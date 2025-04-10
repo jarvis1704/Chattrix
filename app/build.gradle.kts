@@ -88,6 +88,6 @@ dependencies {
     // For Compose navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
-    //lottie flies
-    implementation("com.github.LottieFiles:dotlottie-android:0.0.3")
+
+    implementation("com.airbnb.android:lottie:6.1.0")
 }
