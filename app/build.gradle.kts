@@ -43,6 +43,8 @@ android {
     }
 }
 
+
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -85,4 +87,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
     // For Compose navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    //lottie flies
+    implementation("com.github.LottieFiles:dotlottie-android:0.0.3")
 }
