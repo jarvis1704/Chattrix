@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.biprangshu.chattrix" />
+                  <option name="mobileSdkAppId" value="1:866840075615:android:1f6fa59a3c5dc69172aaea" />
+                  <option name="projectId" value="chattrix-9fbb6" />
+                  <option name="projectNumber" value="866840075615" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
