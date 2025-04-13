@@ -78,7 +78,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
             }
             Text("Or")
             Button({}) {
-                Text("Continue with phone number")
+                Text("Continue with Email")
             }
         }
     }
