@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -34,7 +35,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.biprangshu.chattrix.R
 
 @Composable
-fun OtpScreen(modifier: Modifier = Modifier) {
+fun OtpScreen(modifier: Modifier = Modifier, navController: NavController) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.phone_number))
     var otp by remember { mutableStateOf("") }
 
@@ -69,7 +70,9 @@ fun OtpScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth().height(100.dp),
                 contentAlignment = Alignment.Center
             ){
-                Button(onClick = { /* Handle phone number submission */ }) {
+                Button(onClick = {
+                    navController.navigate(route = OnBoardingScreens.HOME_SCREEN)
+                }) {
                     Text("Submit")
                 }
             }

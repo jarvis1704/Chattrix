@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.biprangshu.chattrix.home.HomeScreen
 
 @Composable
 fun OnBoardingNavigation(modifier: Modifier = Modifier, navController: NavHostController) {
@@ -29,7 +30,12 @@ fun OnBoardingNavigation(modifier: Modifier = Modifier, navController: NavHostCo
         composable(
             route = OnBoardingScreens.OTP_SCREEN
         ) {
-            OtpScreen()
+            OtpScreen(navController= navController)
+        }
+        composable(
+            route = OnBoardingScreens.HOME_SCREEN
+        ) {
+            HomeScreen()
         }
     }
 }
