@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.biprangshu.chattrix.onboarding.LoginScreen
 import com.biprangshu.chattrix.onboarding.LoginWithPhone
+import com.biprangshu.chattrix.onboarding.OtpScreen
 import com.biprangshu.chattrix.ui.theme.ChattrixTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ChattrixTheme {
-                LoginWithPhone()
+                OtpScreen()
             }
         }
     }
