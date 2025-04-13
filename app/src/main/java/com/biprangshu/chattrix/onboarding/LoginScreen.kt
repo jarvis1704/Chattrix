@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimatable
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -30,7 +31,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.biprangshu.chattrix.R
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.chatanimation_1))
 
     Surface(
@@ -77,7 +78,10 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                 Text("Continue with Google")
             }
             Text("Or")
-            Button({}) {
+            Button({
+                navController.navigate(route = OnBoardingScreens.LOGIN_EMAIL)
+            }
+            ) {
                 Text("Continue with Email")
             }
         }

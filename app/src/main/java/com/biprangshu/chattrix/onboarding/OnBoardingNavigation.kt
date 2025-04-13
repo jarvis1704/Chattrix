@@ -18,13 +18,13 @@ fun OnBoardingNavigation(modifier: Modifier = Modifier, navController: NavHostCo
         composable(
             route = OnBoardingScreens.LOGIN_SCREEN
         ) {
-            LoginScreen()
+            LoginScreen(navController= navController)
         }
 
         composable(
             route = OnBoardingScreens.LOGIN_EMAIL
         ) {
-            LoginWithEmail()
+            LoginWithEmail(navController= navController)
         }
         composable(
             route = OnBoardingScreens.OTP_SCREEN

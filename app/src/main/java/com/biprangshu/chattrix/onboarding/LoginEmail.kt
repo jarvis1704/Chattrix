@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -32,7 +33,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.biprangshu.chattrix.R
 
 @Composable
-fun LoginWithEmail(modifier: Modifier = Modifier) {
+fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.email_password))
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -78,7 +79,9 @@ fun LoginWithEmail(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth().height(100.dp),
                 contentAlignment = Alignment.Center
             ){
-                Button(onClick = { /* Handle phone number submission */ }) {
+                Button(onClick = {
+                    navController.navigate(route = OnBoardingScreens.OTP_SCREEN)
+                }) {
                     Text("Submit")
                 }
             }
