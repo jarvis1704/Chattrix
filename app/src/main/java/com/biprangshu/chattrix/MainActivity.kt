@@ -11,8 +11,17 @@ import com.biprangshu.chattrix.onboarding.LoginWithPhone
 import com.biprangshu.chattrix.onboarding.OnBoardingNavigation
 import com.biprangshu.chattrix.onboarding.OtpScreen
 import com.biprangshu.chattrix.ui.theme.ChattrixTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private val googleAuthUiClient by lazy{
+
+    }
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
