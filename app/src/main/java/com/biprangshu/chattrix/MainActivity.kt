@@ -15,10 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var auth: FirebaseAuth
-    private val googleAuthUiClient by lazy{
 
-    }
 
 
 
