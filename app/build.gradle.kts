@@ -7,6 +7,7 @@ plugins {
     id("kotlin-kapt")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("kotlin-parcelize")
+    id("com.google.dagger.hilt.android")
 }
 android {
     namespace = "com.biprangshu.chattrix"
@@ -70,7 +71,6 @@ dependencies {
     // Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.51")
     kapt("com.google.dagger:hilt-compiler:2.51")
-    implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Kotlin Serialization
