@@ -3,6 +3,7 @@ package com.biprangshu.chattrix.authentication
 import android.app.Application
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.biprangshu.chattrix.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -12,10 +13,10 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,18 +27,21 @@ class AuthViewModel @Inject constructor(
 
     constructor(application: Application) : this(Firebase.auth, application)
 
-
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
     val authState: StateFlow<AuthState> = _authState
 
     private val googleSignInClient: GoogleSignInClient by lazy {
-        // With this corrected version:
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(application.getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
 
         GoogleSignIn.getClient(application, gso)
+    }
+
+    init {
+        // Check auth state when ViewModel is created
+        checkAuthState()
     }
 
     fun getSignInIntent(): Intent {
@@ -62,11 +66,16 @@ class AuthViewModel @Inject constructor(
     }
 
     fun checkAuthState() {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            _authState.value = AuthState.SignedIn(currentUser)
-        } else {
-            _authState.value = AuthState.SignedOut
+        // Start with loading state while checking
+        _authState.value = AuthState.Loading
+
+        viewModelScope.launch {
+            val currentUser = auth.currentUser
+            _authState.value = if (currentUser != null) {
+                AuthState.SignedIn(currentUser)
+            } else {
+                AuthState.SignedOut
+            }
         }
     }
 

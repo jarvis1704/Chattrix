@@ -1,12 +1,17 @@
-
 package com.biprangshu.chattrix
 
 import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -44,17 +49,34 @@ fun ChattrixNavigation(
         }
     }
 
-    val authState = authViewModel.authState.collectAsState().value
+    val authState by authViewModel.authState.collectAsState()
 
-    val startDestination = if (authState is AuthState.SignedIn) {
-        ChattrixScreens.HOME_SCREEN
-    } else {
-        ChattrixScreens.LOGIN_SCREEN
+    // Check if we need to navigate to home when auth state changes to signed in
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.SignedIn -> {
+                navController.navigate(ChattrixScreens.HOME_SCREEN) {
+                    popUpTo(ChattrixScreens.LOGIN_SCREEN) {
+                        inclusive = true
+                    }
+                }
+            }
+            else -> {}
+        }
     }
 
+    // Show loading while checking auth state
+    if (authState is AuthState.Initial || authState is AuthState.Loading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    // Use a fixed start destination and handle navigation once NavHost is set up
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = ChattrixScreens.LOGIN_SCREEN
     ){
         // Login screen
         composable(route = ChattrixScreens.LOGIN_SCREEN) {
