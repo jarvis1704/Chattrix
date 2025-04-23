@@ -18,7 +18,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             ChattrixTheme {
                 val navController = rememberNavController()
-                OnBoardingNavigation(navController = navController)
+                ChattrixNavigation(
+                    navController = navController
+                )
             }
         }
     }
