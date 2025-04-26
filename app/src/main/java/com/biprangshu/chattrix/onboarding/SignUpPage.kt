@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +36,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.biprangshu.chattrix.R
+import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
 
 @Composable
@@ -42,6 +46,31 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
     var password by remember { mutableStateOf("") }
 
     val authState= authViewModel.authState.collectAsState()
+
+    // Handle navigation based on auth state
+    when (val state = authState.value) {
+        is AuthState.SignedIn -> {
+            LaunchedEffect(key1 = state) {
+                navController.navigate(OnBoardingScreens.HOME_SCREEN) {
+                    // Optional: Clear the back stack so users can't go back to sign-up screen
+                    popUpTo(OnBoardingScreens.SIGNUP_SCREEN) { inclusive = true }
+                }
+            }
+        }
+        is AuthState.Error -> {
+            // Display error message
+            Text(
+                text = state.message,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+        is AuthState.Loading -> {
+            // Show loading indicator
+            CircularProgressIndicator(modifier = Modifier.padding(8.dp))
+        }
+        else -> { /* Do nothing for other states */ }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -86,7 +115,6 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
             ){
                 Button(onClick = {
                     authViewModel.signupWithEmail(email, password)
-                    navController.navigate(route = OnBoardingScreens.HOME_SCREEN)
                 }) {
                     Text("SignUp")
                 }

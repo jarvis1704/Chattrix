@@ -2,6 +2,7 @@ package com.biprangshu.chattrix.authentication
 
 import android.app.Application
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.biprangshu.chattrix.R
@@ -65,24 +66,35 @@ class AuthViewModel @Inject constructor(
             }
     }
 
-    fun signupWithEmail(email: String, password: String){
-
-        if(email.isEmpty() || password.isEmpty()){
+    fun signupWithEmail(email: String, password: String) {
+        if(email.isEmpty() || password.isEmpty()) {
             _authState.value = AuthState.Error("Email and Password cannot be empty")
             return
         }
 
+        _authState.value = AuthState.Loading
 
-        _authState.value= AuthState.Loading
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener {
-                    task->
-                if (task.isSuccessful){
-                    _authState.value = AuthState.SignedIn(auth.currentUser)
-                }else{
-                    _authState.value = AuthState.Error(task.exception?.message ?: "Login failed")
+        try {
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        _authState.value = AuthState.SignedIn(auth.currentUser)
+                    } else {
+                        // Check specifically for network errors
+                        val exception = task.exception
+                        val errorMessage = when {
+                            exception is java.net.UnknownHostException ||
+                                    exception is java.net.SocketTimeoutException ||
+                                    exception?.message?.contains("network") == true ->
+                                "Network error: Please check your internet connection"
+                            else -> exception?.message ?: "Signup failed"
+                        }
+                        _authState.value = AuthState.Error(errorMessage)
+                    }
                 }
-            }
+        } catch (e: Exception) {
+            _authState.value = AuthState.Error("Unexpected error: ${e.message}")
+        }
     }
 
     fun getSignInIntent(): Intent {
