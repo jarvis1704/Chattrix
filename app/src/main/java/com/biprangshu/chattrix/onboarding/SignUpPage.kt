@@ -44,6 +44,7 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.email_password))
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val authState= authViewModel.authState.collectAsState()
 
@@ -59,17 +60,23 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
         }
         is AuthState.Error -> {
             // Display error message
-            Text(
-                text = state.message,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            errorMessage=state.message
         }
         is AuthState.Loading -> {
             // Show loading indicator
             CircularProgressIndicator(modifier = Modifier.padding(8.dp))
         }
-        else -> { /* Do nothing for other states */ }
+        else -> {
+            errorMessage=null
+        }
+    }
+
+    errorMessage?.let {
+        Text(
+            text = it,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
     }
 
     Surface(
