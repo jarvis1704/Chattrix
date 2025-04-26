@@ -1,5 +1,6 @@
 package com.biprangshu.chattrix.onboarding
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,31 +13,62 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.biprangshu.chattrix.ChattrixScreens
 import com.biprangshu.chattrix.R
+import com.biprangshu.chattrix.authentication.AuthState
+import com.biprangshu.chattrix.authentication.AuthViewModel
 
 @Composable
-fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController) {
+fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel= hiltViewModel()) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.email_password))
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val authState= authViewModel.authState.collectAsState()
+
+    when(authState.value){
+        is AuthState.SignedIn -> {
+            LaunchedEffect(key1 = authState.value) {
+                navController.navigate(ChattrixScreens.HOME_SCREEN) {
+                    popUpTo(OnBoardingScreens.LOGIN_SCREEN) { inclusive = true }
+                }
+            }
+        }
+
+        is AuthState.Loading -> {
+            CircularProgressIndicator(modifier = Modifier.padding(8.dp))
+        }
+
+        is AuthState.Error ->{
+            Toast.makeText(LocalContext.current, (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+        }
+
+        else -> Unit
+    }
+
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -80,9 +112,9 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController) 
                 contentAlignment = Alignment.Center
             ){
                 Button(onClick = {
-                    navController.navigate(route = OnBoardingScreens.OTP_SCREEN)
+                    authViewModel.loginWithEmail(email, password)
                 }) {
-                    Text("Submit")
+                    Text("Log In")
                 }
             }
         }
