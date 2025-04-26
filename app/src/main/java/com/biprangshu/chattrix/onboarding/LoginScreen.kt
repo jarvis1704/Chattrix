@@ -117,6 +117,12 @@ fun LoginScreen(
             }) {
                 Text("Continue with Email")
             }
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = {
+                navController.navigate(route = OnBoardingScreens.SIGNUP_SCREEN)
+            }) {
+                Text("SignUp")
+            }
         }
     }
 }

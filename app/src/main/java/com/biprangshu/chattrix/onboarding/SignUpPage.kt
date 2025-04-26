@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,20 +26,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.biprangshu.chattrix.R
+import com.biprangshu.chattrix.authentication.AuthViewModel
 
 @Composable
-fun SignUpPage(modifier: Modifier = Modifier, navController: NavController) {
+fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel= hiltViewModel()) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.email_password))
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-
+    val authState= authViewModel.authState.collectAsState()
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -82,6 +85,7 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController) {
                 contentAlignment = Alignment.Center
             ){
                 Button(onClick = {
+                    authViewModel.signupWithEmail(email, password)
                     navController.navigate(route = OnBoardingScreens.HOME_SCREEN)
                 }) {
                     Text("SignUp")
