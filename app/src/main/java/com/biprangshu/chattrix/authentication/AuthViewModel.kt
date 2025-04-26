@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.biprangshu.chattrix.R
+import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -42,6 +43,46 @@ class AuthViewModel @Inject constructor(
     init {
         // Check auth state when ViewModel is created
         checkAuthState()
+    }
+
+    fun loginWithEmail(email: String, password: String){
+
+        if(email.isEmpty() || password.isEmpty()){
+            _authState.value = AuthState.Error("Email and Password cannot be empty")
+            return
+        }
+
+
+        _authState.value= AuthState.Loading
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener {
+                task->
+                if (task.isSuccessful){
+                    _authState.value = AuthState.SignedIn(auth.currentUser)
+                }else{
+                    _authState.value = AuthState.Error(task.exception?.message ?: "Login failed")
+                }
+            }
+    }
+
+    fun signupWithEmail(email: String, password: String){
+
+        if(email.isEmpty() || password.isEmpty()){
+            _authState.value = AuthState.Error("Email and Password cannot be empty")
+            return
+        }
+
+
+        _authState.value= AuthState.Loading
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener {
+                    task->
+                if (task.isSuccessful){
+                    _authState.value = AuthState.SignedIn(auth.currentUser)
+                }else{
+                    _authState.value = AuthState.Error(task.exception?.message ?: "Login failed")
+                }
+            }
     }
 
     fun getSignInIntent(): Intent {
