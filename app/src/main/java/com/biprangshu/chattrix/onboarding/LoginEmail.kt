@@ -113,7 +113,9 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
             ){
                 Button(onClick = {
                     authViewModel.loginWithEmail(email, password)
-                }) {
+                },
+                    enabled = authState.value!= AuthState.Loading
+                    ) {
                     Text("Log In")
                 }
             }

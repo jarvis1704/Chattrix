@@ -122,7 +122,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
             ){
                 Button(onClick = {
                     authViewModel.signupWithEmail(email, password)
-                }) {
+                },
+                    enabled = authState.value!= AuthState.Loading
+                ) {
                     Text("SignUp")
                 }
             }
