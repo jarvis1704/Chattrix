@@ -129,7 +129,6 @@ fun HomeScreen(
                         )
                     }
                 }
-                Spacer(Modifier.height(24.dp))
                 Button(
                     onClick = onSignOut,
                     colors = ButtonDefaults.buttonColors(

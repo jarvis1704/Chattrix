@@ -25,7 +25,7 @@ class MainActivityViewModel @Inject constructor(
 ): AndroidViewModel(application){
 
     private val currentUser = FirebaseAuth.getInstance().currentUser
-    private val databaseReference= FirebaseDatabase.getInstance()
+    private val databaseReference= FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
 
 
     private val _isLoading = MutableStateFlow(false)
@@ -46,20 +46,21 @@ class MainActivityViewModel @Inject constructor(
 
             _isLoading.value = true
 
-
             databaseReference.getReference("users").addValueEventListener(object: ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-
                     val newList = mutableListOf<UserModel>()
 
                     for (userSnapshot in snapshot.children) {
                         val userModel = userSnapshot.getValue(UserModel::class.java)
-                        userModel?.let {
-                            newList.add(it)
+                        // Don't include current user in the list
+                        if (userModel?.userId != currentUser.uid) {
+                            userModel?.let {
+                                newList.add(it)
+                            }
                         }
                     }
 
-                    _userList.value = newList  // Assign the new list to the StateFlow
+                    _userList.value = newList
                     _isLoading.value = false
                 }
 
@@ -69,5 +70,6 @@ class MainActivityViewModel @Inject constructor(
             })
         }
     }
+
 
 }

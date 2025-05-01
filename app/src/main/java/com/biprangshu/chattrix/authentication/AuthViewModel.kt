@@ -1,5 +1,6 @@
 package com.biprangshu.chattrix.authentication
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Intent
 import android.util.Log
@@ -80,8 +81,9 @@ class AuthViewModel @Inject constructor(
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _authState.value = AuthState.SignedIn(auth.currentUser)
-                        saveUserToDatabase(auth.currentUser!!)
+                        val user = auth.currentUser
+                        user?.let { saveUserToDatabase(it) }
+                        _authState.value = AuthState.SignedIn(user)
                     } else {
                         // Check specifically for network errors
                         val exception = task.exception
@@ -145,7 +147,7 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun saveUserToDatabase(user: FirebaseUser) {
-        val database = FirebaseDatabase.getInstance()
+        val database = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
         val userRef = database.getReference("users")
 
         val userModel = UserModel(
@@ -155,7 +157,12 @@ class AuthViewModel @Inject constructor(
             mobileNumber = user.phoneNumber
         )
 
-        userRef.child(user.uid).setValue(userModel)
+        userRef.child(user.uid).setValue(userModel).addOnSuccessListener {
+            Log.d("AuthViewModel", "User saved to database successfully")
+        }
+            .addOnFailureListener { e ->
+                Log.e("AuthViewModel", "Failed to save user to database", e)
+            }
     }
 
 }
