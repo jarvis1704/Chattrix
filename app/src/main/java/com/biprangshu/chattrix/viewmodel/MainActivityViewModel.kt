@@ -34,6 +34,9 @@ class MainActivityViewModel @Inject constructor(
     private val _userList = MutableStateFlow(mutableListOf<UserModel>())
     val userList: StateFlow<List<UserModel>> = _userList.asStateFlow()
 
+    init {
+        loadUserList()
+    }
 
     private fun loadUserList() {
         viewModelScope.launch(Dispatchers.IO) {
