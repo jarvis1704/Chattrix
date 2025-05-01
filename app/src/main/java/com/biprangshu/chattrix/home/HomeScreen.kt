@@ -1,10 +1,8 @@
 package com.biprangshu.chattrix.home
 
-import android.graphics.ColorFilter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,35 +11,32 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
@@ -62,6 +57,8 @@ fun HomeScreen(
     val authState by authViewModel.authState.collectAsState()
     val user = (authState as? AuthState.SignedIn)?.user
     val userList by mainActivityViewModel.userList.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -72,26 +69,35 @@ fun HomeScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-//        Text(
-//            text = "Welcome, ${user?.displayName}!",
-//            style = MaterialTheme.typography.headlineMedium,
-//            textAlign = TextAlign.Center
-//        )
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-            Box(
+            // App Header
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .padding(top = 30.dp)
-            ){
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Chattrix", color = MaterialTheme.colorScheme.primary, modifier = Modifier.align(Alignment.CenterVertically))
-                    Image(painter = painterResource(R.drawable.user),
+                    .padding(bottom = 16.dp)
+            ) {
+                Text(
+                    "Chattrix",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // User display name if available
+                    user?.displayName?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    }
+
+                    // Profile image
+                    Image(
+                        painter = painterResource(R.drawable.user),
                         contentDescription = "User image",
                         modifier = Modifier
                             .size(40.dp)
@@ -103,47 +109,78 @@ fun HomeScreen(
                 }
             }
 
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            // Search Bar
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                onSearch = { isSearchActive = false },
+                active = isSearchActive,
+                onActiveChange = { isSearchActive = it },
+                placeholder = { Text("Search chats...") },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                SearchBar(
-                    query = "",
-                    onQueryChange = {},
-                    onSearch = {},
-                    active = false,
-                    onActiveChange = {},
-                ) {
+                // Search results would go here
+                Text("No results found", modifier = Modifier.padding(16.dp))
+            }
 
+            Spacer(modifier = Modifier.height(16.dp))
 
-                //chats go here
-                Text("Chats")
-                Spacer(Modifier.height(16.dp))
-                LazyColumn {
-                    items(userList.size){
-                        index->
-                        val userItem=userList[index]
-                        ChatItem(
-                            userItem = userItem,
-                            onClick = { TODO() }
-                        )
-                    }
-                }
-                Button(
-                    onClick = onSignOut,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
-                    )
-                ) {
-                    Text("Sign Out")
+            // Chat Header
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text(
+                    "Chats",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                TextButton(onClick = { /* Add new chat */ }) {
+                    Text("New Chat")
                 }
             }
 
+            // Chat List
+            if (userList.isEmpty()) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    Text(
+                        "No users found",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(userList.size) { index ->
+                        val userItem = userList[index]
+                        ChatItem(
+                            userItem = userItem,
+                            onClick = { /* Navigate to chat with user */ }
+                        )
+                    }
+                }
+            }
 
+            // Sign Out Button
+            TextButton(
+                onClick = onSignOut,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Text("Sign Out")
+            }
         }
     }
-}
 }
 
 @Composable
@@ -165,24 +202,6 @@ fun ChatItem(
                 .clip(CircleShape)
                 .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
         ) {
-//            if (userItem.profilePicUrl.isNullOrEmpty()) {
-//                // Default profile image if no URL is available
-//                Image(
-//                    painter = painterResource(R.drawable.user),
-//                    contentDescription = "Profile picture",
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentScale = ContentScale.Crop,
-//                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
-//                )
-//            } else {
-//                // Load profile image from URL
-//                AsyncImage(
-//                    model = userItem.profilePicUrl,
-//                    contentDescription = "Profile picture",
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentScale = ContentScale.Crop
-//                )
-//            }
             Image(
                 painter = painterResource(R.drawable.user),
                 contentDescription = "Profile picture",
@@ -206,26 +225,15 @@ fun ChatItem(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-//            // Last message (if exists in your UserModel)
-//            userItem.?.let { lastMessage ->
-//                Text(
-//                    text = lastMessage,
-//                    style = MaterialTheme.typography.bodyMedium,
-//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                    maxLines = 1,
-//                    overflow = TextOverflow.Ellipsis
-//                )
-//            }
+            // Status or last message placeholder
+            Text(
+                text = "Tap to start chatting",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
-
-//        // Timestamp (if exists in your UserModel)
-//        userItem.lastMessageTime?.let { timestamp ->
-//            Text(
-//                text = formatTimestamp(timestamp),
-//                style = MaterialTheme.typography.bodySmall,
-//                color = MaterialTheme.colorScheme.onSurfaceVariant
-//            )
-//        }
     }
 
     // Divider
@@ -268,5 +276,3 @@ fun formatTimestamp(timestamp: Long): String {
         }
     }
 }
-
-
