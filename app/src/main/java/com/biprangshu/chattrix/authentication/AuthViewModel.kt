@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.biprangshu.chattrix.R
+import com.biprangshu.chattrix.data.UserModel
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -14,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,6 +81,7 @@ class AuthViewModel @Inject constructor(
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         _authState.value = AuthState.SignedIn(auth.currentUser)
+                        saveUserToDatabase(auth.currentUser!!)
                     } else {
                         // Check specifically for network errors
                         val exception = task.exception
@@ -110,12 +113,14 @@ class AuthViewModel @Inject constructor(
                 if (task.isSuccessful) {
                     // Sign in success
                     val user = auth.currentUser
+                    user?.let { saveUserToDatabase(it) }
                     _authState.value = AuthState.SignedIn(user)
                 } else {
                     // Sign in fails
                     _authState.value = AuthState.Error(task.exception?.message ?: "Google sign-in failed")
                 }
             }
+
     }
 
     fun checkAuthState() {
@@ -138,6 +143,21 @@ class AuthViewModel @Inject constructor(
             _authState.value = AuthState.SignedOut
         }
     }
+
+    private fun saveUserToDatabase(user: FirebaseUser) {
+        val database = FirebaseDatabase.getInstance()
+        val userRef = database.getReference("users")
+
+        val userModel = UserModel(
+            userId = user.uid,
+            userName = user.displayName ?: "User",
+            profileImage = user.photoUrl?.toString(),
+            mobileNumber = user.phoneNumber
+        )
+
+        userRef.child(user.uid).setValue(userModel)
+    }
+
 }
 
 sealed class AuthState {
