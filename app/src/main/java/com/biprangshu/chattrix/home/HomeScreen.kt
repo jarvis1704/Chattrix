@@ -37,6 +37,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.biprangshu.chattrix.ChattrixScreens
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
@@ -52,6 +54,7 @@ import java.util.Locale
 fun HomeScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     mainActivityViewModel: MainActivityViewModel = hiltViewModel(),
+    navController: NavController,
     onSignOut: () -> Unit
 ) {
     val authState by authViewModel.authState.collectAsState()
@@ -75,7 +78,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .padding(top = 32.dp)
             ) {
                 Text(
                     "Chattrix",
@@ -102,7 +105,9 @@ fun HomeScreen(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                            .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape).clickable(onClick = {
+                                navController.navigate(route = ChattrixScreens.PROFILE_SCREEN)
+                            }),
                         contentScale = ContentScale.Crop,
                         colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.primary)
                     )

@@ -79,7 +79,8 @@ fun OnBoardingNavigation(modifier: Modifier = Modifier, navController: NavHostCo
                     navController.navigate(OnBoardingScreens.LOGIN_SCREEN) {
                         popUpTo(OnBoardingScreens.HOME_SCREEN) { inclusive = true }
                     }
-                }
+                },
+                navController = navController
 
             )
         }

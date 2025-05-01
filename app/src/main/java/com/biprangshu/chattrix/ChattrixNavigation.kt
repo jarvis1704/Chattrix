@@ -25,6 +25,7 @@ import com.biprangshu.chattrix.onboarding.LoginWithEmail
 import com.biprangshu.chattrix.onboarding.OnBoardingScreens
 import com.biprangshu.chattrix.onboarding.OtpScreen
 import com.biprangshu.chattrix.onboarding.SignUpPage
+import com.biprangshu.chattrix.profile.UserProfileScreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 
@@ -115,7 +116,8 @@ fun ChattrixNavigation(
                     navController.navigate(ChattrixScreens.LOGIN_SCREEN) {
                         popUpTo(ChattrixScreens.HOME_SCREEN) { inclusive = true }
                     }
-                }
+                },
+                navController = navController
             )
         }
 
@@ -124,6 +126,12 @@ fun ChattrixNavigation(
             SignUpPage(
                 navController = navController
             )
+        }
+
+        composable(
+            route= ChattrixScreens.PROFILE_SCREEN
+        ) {
+            UserProfileScreen(navController = navController)
         }
     }
 }
