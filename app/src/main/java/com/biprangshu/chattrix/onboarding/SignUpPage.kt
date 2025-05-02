@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,7 +46,7 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
+    var userName by remember { mutableStateOf("") }
     val authState= authViewModel.authState.collectAsState()
 
     // Handle navigation based on auth state
@@ -114,6 +115,14 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                 label = { Text("Your Password") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = PasswordVisualTransformation()
+            )
+            Spacer(Modifier.height(16.dp))
+            Text("What should we call you?")
+            Spacer(Modifier.height(8.dp))
+            TextField(
+                value = userName,
+                onValueChange = {userName=it},
+                placeholder = { Text("Enter your name") },
             )
             Spacer(Modifier.height(48.dp))
             Box (
