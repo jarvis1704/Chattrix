@@ -47,49 +47,76 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var userName by remember { mutableStateOf("") }
-    val authState= authViewModel.authState.collectAsState()
+    val authState = authViewModel.authState.collectAsState()
 
-    // Handle navigation based on auth state
+
+    var shouldSetUsername by remember { mutableStateOf(false) }
+
+
     when (val state = authState.value) {
         is AuthState.SignedIn -> {
             LaunchedEffect(key1 = state) {
-                navController.navigate(OnBoardingScreens.HOME_SCREEN) {
-                    // Optional: Clear the back stack so users can't go back to sign-up screen
-                    popUpTo(OnBoardingScreens.SIGNUP_SCREEN) { inclusive = true }
+                if (shouldSetUsername) {
+                    if (userName.isNotEmpty()) {
+
+                        authViewModel.uploadUserName(userName)
+                    }
+                    shouldSetUsername = false
+                } else {
+                    navController.navigate(OnBoardingScreens.HOME_SCREEN) {
+                        popUpTo(OnBoardingScreens.SIGNUP_SCREEN) { inclusive = true }
+                    }
                 }
             }
         }
         is AuthState.Error -> {
-            // Display error message
-            errorMessage=state.message
+            errorMessage = state.message
+
+            shouldSetUsername = false
         }
         is AuthState.Loading -> {
-            // Show loading indicator
-            CircularProgressIndicator(modifier = Modifier.padding(8.dp))
+
         }
         else -> {
-            errorMessage=null
+            errorMessage = null
         }
-    }
-
-    errorMessage?.let {
-        Text(
-            text = it,
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
     }
 
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(16.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
+
+            if (authState.value is AuthState.Loading) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
             Box(
-                modifier = Modifier.fillMaxWidth().height(300.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
             ) {
                 LottieAnimation(
                     composition = composition,
@@ -97,6 +124,7 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                     modifier = Modifier.fillMaxSize()
                 )
             }
+
             Spacer(Modifier.height(24.dp))
             Text("Enter your Email")
             Spacer(Modifier.height(16.dp))
@@ -104,8 +132,10 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Your Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(Modifier.height(16.dp))
             Text("Enter your Password")
             Spacer(Modifier.height(16.dp))
@@ -114,25 +144,36 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                 onValueChange = { password = it },
                 label = { Text("Your Password") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = PasswordVisualTransformation()
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(Modifier.height(16.dp))
             Text("What should we call you?")
             Spacer(Modifier.height(8.dp))
             TextField(
                 value = userName,
-                onValueChange = {userName=it},
+                onValueChange = { userName = it },
                 placeholder = { Text("Enter your name") },
+                modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(Modifier.height(48.dp))
-            Box (
-                modifier = Modifier.fillMaxWidth().height(100.dp),
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
                 contentAlignment = Alignment.Center
-            ){
-                Button(onClick = {
-                    authViewModel.signupWithEmail(email, password)
-                },
-                    enabled = authState.value!= AuthState.Loading
+            ) {
+                Button(
+                    onClick = {
+                        authViewModel.signupWithEmail(email, password)
+                        shouldSetUsername = true
+                    },
+                    enabled = authState.value != AuthState.Loading &&
+                            email.isNotEmpty() &&
+                            password.isNotEmpty() &&
+                            userName.isNotEmpty()
                 ) {
                     Text("SignUp")
                 }
