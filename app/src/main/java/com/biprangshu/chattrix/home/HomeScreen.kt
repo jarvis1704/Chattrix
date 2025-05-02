@@ -169,7 +169,7 @@ fun HomeScreen(
                         val userItem = userList[index]
                         ChatItem(
                             userItem = userItem,
-                            onClick = { /* Navigate to chat with user */ }
+                            onClick = { navController.navigate(ChattrixScreens.CHAT_SCREEN) }
                         )
                     }
                 }
