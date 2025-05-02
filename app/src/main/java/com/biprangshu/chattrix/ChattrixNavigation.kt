@@ -138,7 +138,7 @@ fun ChattrixNavigation(
         composable(
             route = ChattrixScreens.CHAT_SCREEN
         ) {
-            ChatScreen()
+            ChatScreen(navController= navController)
         }
     }
 }

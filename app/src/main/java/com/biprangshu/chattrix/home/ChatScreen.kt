@@ -37,16 +37,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.biprangshu.chattrix.R
 
 @Composable
-fun ChatScreen(modifier: Modifier = Modifier) {
+fun ChatScreen(modifier: Modifier = Modifier, navController: NavController) {
 
     var message by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
-            TopAppBar()
+            TopAppBar(navController= navController)
         }
     ) {
         innerpaddingvalues->
@@ -79,7 +80,7 @@ fun ChatScreen(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(modifier: Modifier = Modifier) {
+fun TopAppBar(modifier: Modifier = Modifier, navController: NavController) {
     TopAppBar(
         title = {
             Row(
@@ -101,7 +102,7 @@ fun TopAppBar(modifier: Modifier = Modifier) {
             }
         },
         navigationIcon = {
-            IconButton(onClick = {}) {
+            IconButton(onClick = {navController.popBackStack()}) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Go back")
             }
         }
