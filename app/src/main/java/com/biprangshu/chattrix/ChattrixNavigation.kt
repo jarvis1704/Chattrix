@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
+import com.biprangshu.chattrix.home.ChatScreen
 import com.biprangshu.chattrix.home.HomeScreen
 import com.biprangshu.chattrix.onboarding.LoginScreen
 import com.biprangshu.chattrix.onboarding.LoginWithEmail
@@ -132,6 +133,12 @@ fun ChattrixNavigation(
             route= ChattrixScreens.PROFILE_SCREEN
         ) {
             UserProfileScreen(navController = navController)
+        }
+
+        composable(
+            route = ChattrixScreens.CHAT_SCREEN
+        ) {
+            ChatScreen()
         }
     }
 }
