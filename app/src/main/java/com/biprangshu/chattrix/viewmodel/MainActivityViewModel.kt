@@ -5,13 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.biprangshu.chattrix.data.UserModel
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +41,7 @@ class MainActivityViewModel @Inject constructor(
 
             _isLoading.value = true
 
-            // Listen for realtime updates
+            // Listen for realtime updates from Firestore
             db.collection("users")
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {

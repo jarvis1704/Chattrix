@@ -8,7 +8,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.data.UserModel
-import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -17,7 +16,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,20 +50,17 @@ class AuthViewModel @Inject constructor(
     }
 
     fun loginWithEmail(email: String, password: String){
-
         if(email.isEmpty() || password.isEmpty()){
             _authState.value = AuthState.Error("Email and Password cannot be empty")
             return
         }
 
-
-        _authState.value= AuthState.Loading
+        _authState.value = AuthState.Loading
         auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener {
-                task->
+            .addOnCompleteListener { task ->
                 if (task.isSuccessful){
                     _authState.value = AuthState.SignedIn(auth.currentUser)
-                }else{
+                } else {
                     _authState.value = AuthState.Error(task.exception?.message ?: "Login failed")
                 }
             }
@@ -84,12 +79,11 @@ class AuthViewModel @Inject constructor(
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val user = auth.currentUser
-//                        user?.let { saveUserToDatabase(it) }
 
                         val profileUpdates = UserProfileChangeRequest.Builder().setDisplayName(displayName).build()
 
                         user?.updateProfile(profileUpdates)?.addOnCompleteListener {
-                            saveUserToDatabase(user!!,displayName)
+                            user.let { saveUserToFirestore(it, displayName) }
                         }
                         _authState.value = AuthState.SignedIn(user)
                     } else {
@@ -110,28 +104,6 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-//    fun uploadUserName(username: String, displayName: String) {
-//        val currentUser = auth.currentUser
-//        if (currentUser != null) {
-//            _authState.value = AuthState.Loading
-//
-//            val database = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
-//            val userRef = database.getReference("users").child(currentUser.uid)
-//
-//            userRef.child("userName").setValue(username)
-//                .addOnSuccessListener {
-//                    Log.d("AuthViewModel", "Username updated successfully")
-//                    _authState.value = AuthState.SignedIn(currentUser)
-//                }
-//                .addOnFailureListener { e ->
-//                    Log.e("AuthViewModel", "Failed to update username", e)
-//                    _authState.value = AuthState.Error("Failed to update username: ${e.message}")
-//                }
-//        } else {
-//            _authState.value = AuthState.Error("No user is currently signed in")
-//        }
-//    }
-
     fun getSignInIntent(): Intent {
         return googleSignInClient.signInIntent
     }
@@ -145,14 +117,15 @@ class AuthViewModel @Inject constructor(
                 if (task.isSuccessful) {
                     // Sign in success
                     val user = auth.currentUser
-
+                    user?.let {
+                        saveUserToFirestore(it, user.displayName ?: "User")
+                    }
                     _authState.value = AuthState.SignedIn(user)
                 } else {
                     // Sign in fails
                     _authState.value = AuthState.Error(task.exception?.message ?: "Google sign-in failed")
                 }
             }
-
     }
 
     fun checkAuthState() {
@@ -176,12 +149,12 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun saveUserToDatabase(user: FirebaseUser, displayName: String) {
+    private fun saveUserToFirestore(user: FirebaseUser, displayName: String) {
         val db = FirebaseFirestore.getInstance()
 
         val userModel = UserModel(
             userId = user.uid,
-            userName = displayName.ifEmpty { user.displayName?: "User" },
+            userName = displayName.ifEmpty { user.displayName ?: "User" },
             profileImage = user.photoUrl?.toString(),
             mobileNumber = user.phoneNumber
         )
@@ -195,8 +168,6 @@ class AuthViewModel @Inject constructor(
                 Log.e("AuthViewModel", "Failed to save user to Firestore", e)
             }
     }
-
-
 }
 
 sealed class AuthState {
