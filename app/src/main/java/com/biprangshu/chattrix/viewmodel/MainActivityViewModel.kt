@@ -1,6 +1,7 @@
 package com.biprangshu.chattrix.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.biprangshu.chattrix.data.UserModel
@@ -11,6 +12,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,16 +24,15 @@ import javax.inject.Inject
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     application: Application
-): AndroidViewModel(application){
+): AndroidViewModel(application) {
 
     private val currentUser = FirebaseAuth.getInstance().currentUser
-    private val databaseReference= FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
-
+    private val db = FirebaseFirestore.getInstance()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _userList = MutableStateFlow(mutableListOf<UserModel>())
+    private val _userList = MutableStateFlow<List<UserModel>>(mutableListOf())
     val userList: StateFlow<List<UserModel>> = _userList.asStateFlow()
 
     init {
@@ -46,30 +47,29 @@ class MainActivityViewModel @Inject constructor(
 
             _isLoading.value = true
 
-            databaseReference.getReference("users").addValueEventListener(object: ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val newList = mutableListOf<UserModel>()
-
-                    for (userSnapshot in snapshot.children) {
-                        val userModel = userSnapshot.getValue(UserModel::class.java)
-                        // Don't include current user in the list
-                        if (userModel?.userId != currentUser.uid) {
-                            userModel?.let {
-                                newList.add(it)
-                            }
-                        }
+            // Listen for realtime updates
+            db.collection("users")
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.e("MainViewModel", "Error fetching users", error)
+                        _isLoading.value = false
+                        return@addSnapshotListener
                     }
 
-                    _userList.value = newList
-                    _isLoading.value = false
+                    if (snapshot != null) {
+                        val newList = mutableListOf<UserModel>()
+                        for (document in snapshot.documents) {
+                            val userModel = document.toObject(UserModel::class.java)
+                            if (userModel?.userId != currentUser.uid) {
+                                userModel?.let {
+                                    newList.add(it)
+                                }
+                            }
+                        }
+                        _userList.value = newList
+                        _isLoading.value = false
+                    }
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    _isLoading.value = false
-                }
-            })
         }
     }
-
-
 }

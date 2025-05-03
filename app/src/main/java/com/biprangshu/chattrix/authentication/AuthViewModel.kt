@@ -15,8 +15,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,7 +71,7 @@ class AuthViewModel @Inject constructor(
             }
     }
 
-    fun signupWithEmail(email: String, password: String) {
+    fun signupWithEmail(email: String, password: String, displayName: String) {
         if(email.isEmpty() || password.isEmpty()) {
             _authState.value = AuthState.Error("Email and Password cannot be empty")
             return
@@ -82,7 +84,13 @@ class AuthViewModel @Inject constructor(
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val user = auth.currentUser
-                        user?.let { saveUserToDatabase(it) }
+//                        user?.let { saveUserToDatabase(it) }
+
+                        val profileUpdates = UserProfileChangeRequest.Builder().setDisplayName(displayName).build()
+
+                        user?.updateProfile(profileUpdates)?.addOnCompleteListener {
+                            saveUserToDatabase(user!!,displayName)
+                        }
                         _authState.value = AuthState.SignedIn(user)
                     } else {
                         // Check specifically for network errors
@@ -102,7 +110,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun uploadUserName(username: String) {
+    fun uploadUserName(username: String, displayName: String) {
         val currentUser = auth.currentUser
         if (currentUser != null) {
             _authState.value = AuthState.Loading
@@ -137,7 +145,7 @@ class AuthViewModel @Inject constructor(
                 if (task.isSuccessful) {
                     // Sign in success
                     val user = auth.currentUser
-                    user?.let { saveUserToDatabase(it) }
+
                     _authState.value = AuthState.SignedIn(user)
                 } else {
                     // Sign in fails
@@ -168,24 +176,26 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun saveUserToDatabase(user: FirebaseUser) {
-        val database = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
-        val userRef = database.getReference("users")
+    private fun saveUserToDatabase(user: FirebaseUser, displayName: String) {
+        val db = FirebaseFirestore.getInstance()
 
         val userModel = UserModel(
             userId = user.uid,
-            userName = user.displayName ?: "User",
+            userName = displayName.ifEmpty { user.displayName?: "User" },
             profileImage = user.photoUrl?.toString(),
             mobileNumber = user.phoneNumber
         )
-
-        userRef.child(user.uid).setValue(userModel).addOnSuccessListener {
-            Log.d("AuthViewModel", "User saved to database successfully")
-        }
+        Log.d("AuthViewModel", "Saving user to Firestore: $userModel")
+        db.collection("users").document(user.uid)
+            .set(userModel)
+            .addOnSuccessListener {
+                Log.d("AuthViewModel", "User saved to Firestore successfully")
+            }
             .addOnFailureListener { e ->
-                Log.e("AuthViewModel", "Failed to save user to database", e)
+                Log.e("AuthViewModel", "Failed to save user to Firestore", e)
             }
     }
+
 
 }
 
