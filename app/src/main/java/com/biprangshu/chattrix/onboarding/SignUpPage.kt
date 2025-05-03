@@ -49,23 +49,23 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
     var userName by remember { mutableStateOf("") }
     val authState = authViewModel.authState.collectAsState()
 
-
     var shouldSetUsername by remember { mutableStateOf(false) }
 
 
     when (val state = authState.value) {
         is AuthState.SignedIn -> {
             LaunchedEffect(key1 = state) {
-                if (shouldSetUsername) {
-                    if (userName.isNotEmpty()) {
-
-                        authViewModel.uploadUserName(userName)
-                    }
-                    shouldSetUsername = false
-                } else {
-                    navController.navigate(OnBoardingScreens.HOME_SCREEN) {
-                        popUpTo(OnBoardingScreens.SIGNUP_SCREEN) { inclusive = true }
-                    }
+//                if (shouldSetUsername) {
+//                    if (userName.isNotEmpty()) {
+//
+//                        authViewModel.uploadUserName(userName, )
+//                    }
+//                    shouldSetUsername = false
+//                } else {
+//
+//                }
+                navController.navigate(OnBoardingScreens.HOME_SCREEN) {
+                    popUpTo(OnBoardingScreens.SIGNUP_SCREEN) { inclusive = true }
                 }
             }
         }
@@ -157,7 +157,6 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                 placeholder = { Text("Enter your name") },
                 modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(Modifier.height(48.dp))
             Box(
                 modifier = Modifier
@@ -167,7 +166,7 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
             ) {
                 Button(
                     onClick = {
-                        authViewModel.signupWithEmail(email, password)
+                        authViewModel.signupWithEmail(email, password, userName)
                         shouldSetUsername = true
                     },
                     enabled = authState.value != AuthState.Loading &&

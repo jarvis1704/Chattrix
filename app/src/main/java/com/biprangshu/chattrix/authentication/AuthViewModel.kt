@@ -110,27 +110,27 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun uploadUserName(username: String, displayName: String) {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            _authState.value = AuthState.Loading
-
-            val database = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
-            val userRef = database.getReference("users").child(currentUser.uid)
-
-            userRef.child("userName").setValue(username)
-                .addOnSuccessListener {
-                    Log.d("AuthViewModel", "Username updated successfully")
-                    _authState.value = AuthState.SignedIn(currentUser)
-                }
-                .addOnFailureListener { e ->
-                    Log.e("AuthViewModel", "Failed to update username", e)
-                    _authState.value = AuthState.Error("Failed to update username: ${e.message}")
-                }
-        } else {
-            _authState.value = AuthState.Error("No user is currently signed in")
-        }
-    }
+//    fun uploadUserName(username: String, displayName: String) {
+//        val currentUser = auth.currentUser
+//        if (currentUser != null) {
+//            _authState.value = AuthState.Loading
+//
+//            val database = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
+//            val userRef = database.getReference("users").child(currentUser.uid)
+//
+//            userRef.child("userName").setValue(username)
+//                .addOnSuccessListener {
+//                    Log.d("AuthViewModel", "Username updated successfully")
+//                    _authState.value = AuthState.SignedIn(currentUser)
+//                }
+//                .addOnFailureListener { e ->
+//                    Log.e("AuthViewModel", "Failed to update username", e)
+//                    _authState.value = AuthState.Error("Failed to update username: ${e.message}")
+//                }
+//        } else {
+//            _authState.value = AuthState.Error("No user is currently signed in")
+//        }
+//    }
 
     fun getSignInIntent(): Intent {
         return googleSignInClient.signInIntent
