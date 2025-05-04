@@ -169,7 +169,8 @@ fun HomeScreen(
                         val userItem = userList[index]
                         ChatItem(
                             userItem = userItem,
-                            onClick = { "${ChattrixScreens.CHAT_SCREEN}/${userItem.userId}/${userItem.userName}" }
+                            onClick = { "${ChattrixScreens.CHAT_SCREEN}/${userItem.userId}/${userItem.userName}" },
+                            navController = navController
                         )
                     }
                 }
@@ -191,12 +192,15 @@ fun HomeScreen(
 @Composable
 fun ChatItem(
     userItem: UserModel,
-    onClick: () -> Unit = {}
+    onClick: () -> String,
+    navController: NavController
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable {
+                navController.navigate(onClick())
+            }
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

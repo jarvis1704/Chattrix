@@ -131,23 +131,22 @@ fun ChattrixNavigation(
             )
         }
 
-        composable(
-            route= ChattrixScreens.PROFILE_SCREEN
-        ) {
+        composable(route= ChattrixScreens.PROFILE_SCREEN) {
             UserProfileScreen(navController = navController)
         }
 
+        // Chat screen with userId and userName
         composable(
             route = "${ChattrixScreens.CHAT_SCREEN}/{userId}/{userName}",
             arguments = listOf(
-                navArgument("userId") { type= NavType.StringType },
-                navArgument("userName") { type= NavType.StringType }
+                navArgument("userId") { type = NavType.StringType },
+                navArgument("userName") { type = NavType.StringType }
             )
-        ) {backstackEntry->
-            val userId= backstackEntry.arguments?.getString("userId")?: ""
-            val userName= backstackEntry.arguments?.getString("userName")?: ""
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            val userName = backStackEntry.arguments?.getString("userName") ?: ""
             ChatScreen(
-                navController= navController,
+                navController = navController,
                 userId = userId,
                 userName = userName
             )

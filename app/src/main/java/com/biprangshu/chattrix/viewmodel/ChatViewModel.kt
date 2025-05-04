@@ -29,7 +29,7 @@ class ChatViewModel @Inject constructor(
 
     fun sendMessage(recieverId: String, message: String){
         chatService.sendMessage(message = message, recieverId = recieverId){
-            success->
+                success->
             //handling success or failure
         }
     }
@@ -38,28 +38,29 @@ class ChatViewModel @Inject constructor(
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
         val chatId= chatService.getChatId(currentUser.uid, otherUserId)
 
-        //remove duplicate message listener
+        //remove previous message listener if exists
         messageListener?.let {
             database.getReference("chats/$chatId/messages").removeEventListener(it)
         }
 
-        //set up real time messaging
-        messageListener?.let {
-            database.getReference("chats/$chatId/messages").orderByChild("timestamp")
-                .addValueEventListener(object : ValueEventListener{
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val messaageList = mutableListOf<MessageModel>()
-                        for(messageSnapshot in snapshot.children){
-                            val message = messageSnapshot.getValue(MessageModel::class.java)
+        //set up new message listener
+        messageListener = database.getReference("chats/$chatId/messages").orderByChild("timestamp")
+            .addValueEventListener(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val messageList = mutableListOf<MessageModel>()
+                    for(messageSnapshot in snapshot.children){
+                        val message = messageSnapshot.getValue(MessageModel::class.java)
+                        message?.let {
+                            messageList.add(it)
                         }
-                        _messages.value=messaageList
                     }
+                    _messages.value = messageList
+                }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        //handle error
-                    }
-                })
-        }
+                override fun onCancelled(error: DatabaseError) {
+                    //handle error
+                }
+            })
     }
 
     override fun onCleared() {
@@ -68,5 +69,4 @@ class ChatViewModel @Inject constructor(
             database.getReference("chats").removeEventListener(it)
         }
     }
-
 }

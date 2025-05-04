@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +28,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +49,7 @@ import com.biprangshu.chattrix.data.MessageModel
 import com.biprangshu.chattrix.viewmodel.ChatViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
@@ -59,10 +58,9 @@ fun ChatScreen(
     userId: String,
     userName: String
 ) {
-
     val messages by chatViewModel.messages.collectAsState()
-    var message by remember { mutableStateOf("") }
-    val currentUser= FirebaseAuth.getInstance().currentUser
+    var messageText by remember { mutableStateOf("") }
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
     LaunchedEffect(key1 = userId) {
         chatViewModel.loadMessage(userId)
@@ -70,26 +68,32 @@ fun ChatScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(navController= navController)
+            TopAppBar(
+                navController = navController,
+                userName = userName
+            )
         }
-    ) {
-        innerpaddingvalues->
+    ) { innerPaddingValues ->
         Surface(
-            modifier= Modifier.fillMaxSize().padding(innerpaddingvalues)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPaddingValues)
         ) {
             Column(
-                modifier= Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
             ) {
-                //messages go here
+                // Messages list
                 LazyColumn(
-                    modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     reverseLayout = true
                 ) {
-
-                    items(messages.size) {
-                        index->
-                        val message=messages[index]
-                        val isFromMe= message.senderId == currentUser?.uid
+                    items(messages.size) { index ->
+                        val message = messages[index]
+                        val isFromMe = message.senderId == currentUser?.uid
 
                         MessageItem(
                             message = message,
@@ -97,19 +101,32 @@ fun ChatScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                     }
-
                 }
-                //message input feild
-                Row {
+
+                // Message input field
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     OutlinedTextField(
-                        value = message,
-                        onValueChange = { message = it },
+                        value = messageText,
+                        onValueChange = { messageText = it },
                         placeholder = { Text("Type a message...") },
                         modifier = Modifier.weight(1f)
                     )
                     Spacer(Modifier.width(8.dp))
-                    //send icon
-                    IconButton(onClick = { /*TODO*/ }, enabled = message.isNotBlank()) {
+                    // Send icon
+                    IconButton(
+                        onClick = {
+                            if (messageText.isNotBlank()) {
+                                chatViewModel.sendMessage(userId, messageText)
+                                messageText = ""
+                            }
+                        },
+                        enabled = messageText.isNotBlank()
+                    ) {
                         Icon(Icons.Default.Send, contentDescription = "Send message")
                     }
                 }
@@ -120,13 +137,16 @@ fun ChatScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(modifier: Modifier = Modifier, navController: NavController) {
+fun TopAppBar(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    userName: String
+) {
     TopAppBar(
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Image(
                     painter = painterResource(R.drawable.user),
                     contentDescription = "User image",
@@ -138,11 +158,11 @@ fun TopAppBar(modifier: Modifier = Modifier, navController: NavController) {
                     colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(text = "User Name")
+                Text(text = userName)
             }
         },
         navigationIcon = {
-            IconButton(onClick = {navController.popBackStack()}) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Go back")
             }
         }
