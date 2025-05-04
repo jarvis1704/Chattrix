@@ -89,7 +89,6 @@ fun ChatScreen(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
-                    reverseLayout = true
                 ) {
                     items(messages.size) { index ->
                         val message = messages[index]
