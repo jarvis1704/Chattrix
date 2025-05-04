@@ -15,8 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
 import com.biprangshu.chattrix.home.ChatScreen
@@ -136,9 +138,19 @@ fun ChattrixNavigation(
         }
 
         composable(
-            route = ChattrixScreens.CHAT_SCREEN
-        ) {
-            ChatScreen(navController= navController)
+            route = "${ChattrixScreens.CHAT_SCREEN}/{userId}/{userName}",
+            arguments = listOf(
+                navArgument("userId") { type= NavType.StringType },
+                navArgument("userName") { type= NavType.StringType }
+            )
+        ) {backstackEntry->
+            val userId= backstackEntry.arguments?.getString("userId")?: ""
+            val userName= backstackEntry.arguments?.getString("userName")?: ""
+            ChatScreen(
+                navController= navController,
+                userId = userId,
+                userName = userName
+            )
         }
     }
 }

@@ -6,8 +6,8 @@ import com.google.firebase.database.FirebaseDatabase
 import javax.inject.Inject
 
 class ChatService @Inject constructor(
-    private val database: FirebaseDatabase = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app"),
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val database: FirebaseDatabase,
+    private val auth: FirebaseAuth
 ) {
 
     //chatid for users
@@ -20,9 +20,9 @@ class ChatService @Inject constructor(
     }
 
     //send message
-    fun sendMessage(message: String, reciverId: String, onComplete: (Boolean)->Unit){
+    fun sendMessage(message: String, recieverId: String, onComplete: (Boolean)->Unit){
         val currentUser = auth.currentUser?: return
-        val chatId= getChatId(currentUser.uid, reciverId)
+        val chatId= getChatId(currentUser.uid, recieverId)
         val messagesref= database.getReference("chats/$chatId/messages")
 
         val messageId=messagesref.push().key ?: return
@@ -31,16 +31,20 @@ class ChatService @Inject constructor(
         val messageModel= MessageModel(
             messageId = messageId,
             senderId = currentUser.uid,
-            recieverId = reciverId,
+            recieverId = recieverId,
             message = message,
             timestamp = timeStamp,
         )
 
-        messagesref.child(messageId).setValue(message)
+        messagesref.child(messageId).setValue(messageModel)
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
 
     }
 
-
+    // Mark message as read
+    fun markMessageAsRead(chatId: String, messageId: String) {
+        database.getReference("chats/$chatId/messages/$messageId/isRead")
+            .setValue(true)
+    }
 }

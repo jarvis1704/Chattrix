@@ -28,7 +28,7 @@ class ChatViewModel @Inject constructor(
     private val database = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
 
     fun sendMessage(recieverId: String, message: String){
-        chatService.sendMessage(message = message, reciverId = recieverId){
+        chatService.sendMessage(message = message, recieverId = recieverId){
             success->
             //handling success or failure
         }
