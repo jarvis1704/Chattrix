@@ -49,6 +49,7 @@ import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
 import com.biprangshu.chattrix.data.UserModel
+import com.biprangshu.chattrix.uiutils.ChatItem
 import com.biprangshu.chattrix.viewmodel.MainActivityViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -202,71 +203,6 @@ fun HomeScreen(
     }
 }
 
-@Composable
-fun ChatItem(
-    userItem: UserModel,
-    onClick: () -> String,
-    navController: NavController
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                navController.navigate(onClick())
-            }
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Profile picture
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
-        ) {
-            Image(
-                painter = painterResource(R.drawable.user),
-                contentDescription = "Profile picture",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        // User details
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            // User name
-            Text(
-                text = userItem.userName ?: "Unknown User",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Status or last message placeholder
-            Text(
-                text = "Tap to start chatting",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-
-    // Divider
-    Divider(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 62.dp),
-        color = MaterialTheme.colorScheme.outlineVariant,
-        thickness = 0.5.dp
-    )
-}
 
 // Helper function to format timestamp
 fun formatTimestamp(timestamp: Long): String {
