@@ -11,13 +11,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
@@ -143,9 +149,6 @@ fun HomeScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
 
-                TextButton(onClick = { /* Add new chat */ }) {
-                    Text("New Chat")
-                }
             }
 
             // Chat List
@@ -176,15 +179,25 @@ fun HomeScreen(
                 }
             }
 
-            // Sign Out Button
-            TextButton(
-                onClick = onSignOut,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
+            FloatingActionButton(
+                onClick = {},
+                modifier = Modifier.offset(x=150.dp, y= (-70).dp),
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 15.dp
+                )
             ) {
-                Text("Sign Out")
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add button")
             }
+
+//            // Sign Out Button
+//            TextButton(
+//                onClick = onSignOut,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 16.dp)
+//            ) {
+//                Text("Sign Out")
+//            }
         }
     }
 }
