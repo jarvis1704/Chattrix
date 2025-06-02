@@ -32,7 +32,7 @@ fun NewChatScreen(
     navController: NavController
 ) {
 
-    val userList by mainActivityViewModel.userList.collectAsState()
+    val allUsersList by mainActivityViewModel.allUserList.collectAsState()
 
 
     Surface(
@@ -47,7 +47,7 @@ fun NewChatScreen(
             Spacer(Modifier.height(16.dp))
 
             //users list in chattrix
-            if(userList.isEmpty()){
+            if(allUsersList.isEmpty()){
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier= Modifier.fillMaxWidth().weight(1f)
@@ -58,9 +58,9 @@ fun NewChatScreen(
                 LazyColumn (
                     modifier = Modifier.weight(1f)
                 ){
-                    items(userList.size){
+                    items(allUsersList.size){
                         index->
-                        val user=userList[index]
+                        val user=allUsersList[index]
                         ChatItem(
                             userItem = user,
                             onClick = {"${ChattrixScreens.CHAT_SCREEN}/${user.userId}/${user.userName}"},

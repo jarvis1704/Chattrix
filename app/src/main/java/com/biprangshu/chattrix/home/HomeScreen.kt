@@ -66,7 +66,7 @@ fun HomeScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
     val user = (authState as? AuthState.SignedIn)?.user
-    val userList by mainActivityViewModel.userList.collectAsState()
+    val currentUserList by mainActivityViewModel.userList.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
 
@@ -153,7 +153,7 @@ fun HomeScreen(
             }
 
             // Chat List
-            if (userList.isEmpty()) {
+            if (currentUserList.isEmpty()) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -169,8 +169,8 @@ fun HomeScreen(
                 LazyColumn(
                     modifier = Modifier.weight(1f)
                 ) {
-                    items(userList.size) { index ->
-                        val userItem = userList[index]
+                    items(currentUserList.size) { index ->
+                        val userItem = currentUserList[index]
                         ChatItem(
                             userItem = userItem,
                             onClick = { "${ChattrixScreens.CHAT_SCREEN}/${userItem.userId}/${userItem.userName}" },
