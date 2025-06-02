@@ -93,16 +93,16 @@ fun HomeScreen(
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // User display name if available
-                    user?.displayName?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                    }
+//                    // User display name if available
+//                    user?.displayName?.let {
+//                        Text(
+//                            text = it,
+//                            style = MaterialTheme.typography.bodyMedium,
+//                            maxLines = 1,
+//                            overflow = TextOverflow.Ellipsis,
+//                            modifier = Modifier.padding(end = 8.dp)
+//                        )
+//                    }
 
                     // Profile image
                     Image(
