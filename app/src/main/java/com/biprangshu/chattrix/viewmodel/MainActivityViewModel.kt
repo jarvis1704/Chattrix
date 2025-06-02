@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.biprangshu.chattrix.data.MessageModel
 import com.biprangshu.chattrix.data.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -19,6 +20,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+
+data class UserChatInfo(
+    val userModel: UserModel,
+    val lastMessageText: String = "Tap to start chatting",
+    val lastMessageTimeStamp: Long =0L
+)
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
@@ -37,8 +44,8 @@ class MainActivityViewModel @Inject constructor(
     private val _allUserList = MutableStateFlow<List<UserModel>>(emptyList()) // Initialize with emptyList
     val allUserList: StateFlow<List<UserModel>> = _allUserList.asStateFlow()
 
-    private val _userList = MutableStateFlow<List<UserModel>>(emptyList()) // Initialize with emptyList
-    val userList: StateFlow<List<UserModel>> = _userList.asStateFlow()
+    private val _userList = MutableStateFlow<List<UserChatInfo>>(emptyList()) // Initialize with emptyList
+    val userList: StateFlow<List<UserChatInfo>> = _userList.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
@@ -54,8 +61,7 @@ class MainActivityViewModel @Inject constructor(
             loadUsersWithChats()
         } else {
             Log.w(TAG, "ViewModel init: Current user is null. Not loading data yet.")
-            // Consider a mechanism to retry loading if auth state changes later
-            // or ensure this ViewModel is only created post-authentication.
+
         }
     }
 
@@ -169,7 +175,7 @@ class MainActivityViewModel @Inject constructor(
                         Log.d(TAG, "loadUsersWithChats - onDataChange: Collected user IDs with chats: $userIdsWithChats (Count: ${userIdsWithChats.size})")
 
                         if (userIdsWithChats.isNotEmpty()) {
-                            fetchUsersById(userIdsWithChats.toList())
+                            fetchChatPartnersDetails(userIdsWithChats.toList())
                         } else {
                             Log.d(TAG, "loadUsersWithChats - onDataChange: No relevant user IDs found. Setting active chat user list to empty.")
                             _userList.value = emptyList()
@@ -186,57 +192,176 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    private fun fetchUsersById(userIds: List<String>) {
+//    private fun fetchUsersById(userIds: List<String>) {
+//        viewModelScope.launch(Dispatchers.IO) {
+//            Log.d(TAG, "fetchUsersById: Starting for user IDs: $userIds")
+//            if (userIds.isEmpty()) {
+//                Log.d(TAG, "fetchUsersById: userIds list is empty. Not fetching from Firestore.")
+//                _userList.value = emptyList()
+//                return@launch
+//            }
+//            _isLoading.value = true
+//            try {
+//                val users = mutableListOf<UserModel>()
+//                val batches = userIds.chunked(10) // Max 10 for 'in' query
+//
+//                for (batch in batches) {
+//                    Log.d(TAG, "fetchUsersById: Querying Firestore for batch: $batch")
+//                    try {
+//                        val querySnapshot = db.collection("users")
+//                            .whereIn("userId", batch)
+//                            .get()
+//                            .await()
+//
+//                        Log.d(TAG, "fetchUsersById: Firestore query for batch returned ${querySnapshot.documents.size} documents.")
+//
+//                        for (document in querySnapshot.documents) {
+//                            try {
+//                                val userModel = document.toObject(UserModel::class.java)
+//                                if (userModel?.userId != null) {
+//                                    users.add(userModel)
+//                                    Log.d(TAG, "fetchUsersById: Successfully fetched and added user: ${userModel.userName} (ID: ${userModel.userId})")
+//                                } else {
+//                                    Log.w(TAG, "fetchUsersById: Converted UserModel is null or has null userId. Document ID: ${document.id}")
+//                                }
+//                            } catch (e: Exception) {
+//                                Log.e(TAG, "fetchUsersById: Error converting Firestore document ${document.id} to UserModel.", e)
+//                            }
+//                        }
+//                    } catch (e: Exception) {
+//                        Log.e(TAG, "fetchUsersById: Error fetching batch $batch from Firestore.", e)
+//                    }
+//                }
+//
+//                val distinctUsers = users.distinctBy { it.userId }
+//                _userList.value = distinctUsers
+//                Log.d(TAG, "fetchUsersById: Successfully updated _userList with ${distinctUsers.size} users: ${distinctUsers.joinToString { it.userName ?: "N/A" }}")
+//
+//            } catch (e: Exception) {
+//                Log.e(TAG, "fetchUsersById: General error.", e)
+//                _errorMessage.value = "Failed to load chat user details: ${e.message}"
+//                _userList.value = emptyList()
+//            } finally {
+//                _isLoading.value = false
+//            }
+//        }
+//    }
+
+    fun getChatId(userId1: String, userId2: String): String {
+        return if (userId1 < userId2){
+            "$userId1-$userId2"
+        }else{
+            "$userId2-$userId1"
+        }
+    }
+
+    // Inside MainActivityViewModel.kt
+
+    private fun fetchChatPartnersDetails(partnerIds: List<String>) {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.d(TAG, "fetchUsersById: Starting for user IDs: $userIds")
-            if (userIds.isEmpty()) {
-                Log.d(TAG, "fetchUsersById: userIds list is empty. Not fetching from Firestore.")
-                _userList.value = emptyList() // Should already be handled by caller, but defensive
+            Log.d(TAG, "fetchChatPartnersDetails: Starting for partner IDs: $partnerIds")
+            if (partnerIds.isEmpty()) {
+                Log.d(TAG, "fetchChatPartnersDetails: partnerIds list is empty. Setting _userList to empty.")
+                _userList.value = emptyList()
+                _isLoading.value = false // Ensure isLoading is reset here as well
                 return@launch
             }
             _isLoading.value = true
             try {
-                val users = mutableListOf<UserModel>()
-                val batches = userIds.chunked(10) // Max 10 for 'in' query
+                // 1. Fetch all relevant UserModel objects from Firestore
+                val userModels = mutableListOf<UserModel>()
+                val batches = partnerIds.chunked(10) // Firestore 'in' query limit
 
                 for (batch in batches) {
-                    Log.d(TAG, "fetchUsersById: Querying Firestore for batch: $batch")
+                    Log.d(TAG, "fetchChatPartnersDetails: Querying Firestore for user batch: $batch")
                     try {
                         val querySnapshot = db.collection("users")
-                            .whereIn("userId", batch) // Make sure 'userId' is the exact field name in Firestore
+                            .whereIn("userId", batch) // Ensure "userId" is the exact field name in Firestore
                             .get()
                             .await()
-
-                        Log.d(TAG, "fetchUsersById: Firestore query for batch returned ${querySnapshot.documents.size} documents.")
-
+                        Log.d(TAG, "fetchChatPartnersDetails: Firestore query for user batch returned ${querySnapshot.documents.size} documents.")
                         for (document in querySnapshot.documents) {
                             try {
                                 val userModel = document.toObject(UserModel::class.java)
-                                if (userModel?.userId != null) {
-                                    users.add(userModel)
-                                    Log.d(TAG, "fetchUsersById: Successfully fetched and added user: ${userModel.userName} (ID: ${userModel.userId})")
+                                if (userModel != null) {
+                                    userModels.add(userModel)
+                                    Log.d(TAG, "fetchChatPartnersDetails: Successfully converted and added UserModel: ${userModel.userName} (ID: ${userModel.userId})")
                                 } else {
-                                    Log.w(TAG, "fetchUsersById: Converted UserModel is null or has null userId. Document ID: ${document.id}")
+                                    Log.w(TAG, "fetchChatPartnersDetails: UserModel conversion returned null for document ID: ${document.id}")
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG, "fetchUsersById: Error converting Firestore document ${document.id} to UserModel.", e)
+                                Log.e(TAG, "fetchChatPartnersDetails: Error converting Firestore document ${document.id} to UserModel", e)
                             }
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "fetchUsersById: Error fetching batch $batch from Firestore.", e)
+                        Log.e(TAG, "fetchChatPartnersDetails: Error fetching user batch $batch from Firestore.", e)
                     }
                 }
+                Log.d(TAG, "fetchChatPartnersDetails: Total fetched UserModel objects: ${userModels.size}. Users: ${userModels.joinToString { it.userName ?: "N/A" }}")
 
-                val distinctUsers = users.distinctBy { it.userId }
-                _userList.value = distinctUsers
-                Log.d(TAG, "fetchUsersById: Successfully updated _userList with ${distinctUsers.size} users: ${distinctUsers.joinToString { it.userName ?: "N/A" }}")
+                if (userModels.isEmpty()) {
+                    Log.w(TAG, "fetchChatPartnersDetails: No UserModel objects were successfully fetched or converted. Setting _userList to empty.")
+                    _userList.value = emptyList()
+                    _isLoading.value = false // Ensure isLoading is reset
+                    return@launch
+                }
+
+                // 2. For each UserModel, fetch their last message from Realtime DB
+                val userChatInfoList = mutableListOf<UserChatInfo>()
+                val currentUid = currentUser?.uid ?: run {
+                    Log.e(TAG, "fetchChatPartnersDetails: Current user UID is null. Cannot proceed to fetch last messages.")
+                    _userList.value = emptyList()
+                    _isLoading.value = false
+                    return@launch
+                }
+
+                for (userModel in userModels) {
+                    val partnerUid = userModel.userId ?: continue // Should not happen if models were added, but defensive
+                    val chatId = getChatId(currentUid, partnerUid) // Ensure this uses the correct delimiter
+                    Log.d(TAG, "fetchChatPartnersDetails: Processing user ${userModel.userName} (partnerUid: $partnerUid), generating chatId: $chatId")
+                    var lastMsgText = "Tap to start chatting" // Default
+                    var lastMsgTimestamp = 0L
+
+                    try {
+                        Log.d(TAG, "fetchChatPartnersDetails: Attempting to fetch last message for chat $chatId")
+                        val lastMessageSnapshot = realtimeDb.getReference("chats/$chatId/messages")
+                            .orderByChild("timestamp")
+                            .limitToLast(1)
+                            .get().await()
+
+                        if (lastMessageSnapshot.hasChildren()) {
+                            Log.d(TAG, "fetchChatPartnersDetails: Last message snapshot for $chatId HAS children.")
+                            val messageDataSnapshot = lastMessageSnapshot.children.first() // Get the single child
+                            val messageData = messageDataSnapshot.getValue(MessageModel::class.java)
+                            if (messageData != null) {
+                                val senderPrefix = if (messageData.senderId == currentUid) "You: " else ""
+                                lastMsgText = senderPrefix + (messageData.message ?: "")
+                                lastMsgTimestamp = messageData.timestamp ?: 0L
+                                Log.d(TAG, "fetchChatPartnersDetails: Last message for $chatId: '$lastMsgText' (ts: $lastMsgTimestamp)")
+                            } else {
+                                Log.w(TAG, "fetchChatPartnersDetails: Failed to convert last message snapshot to MessageModel for $chatId. Snapshot value: ${messageDataSnapshot.value}")
+                            }
+                        } else {
+                            Log.d(TAG, "fetchChatPartnersDetails: No last message found for chat $chatId (snapshot has no children).")
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "fetchChatPartnersDetails: Error fetching last message for chat $chatId", e)
+                        // Continue to add user with default message text
+                    }
+                    userChatInfoList.add(UserChatInfo(userModel, lastMsgText, lastMsgTimestamp))
+                }
+
+                Log.d(TAG, "fetchChatPartnersDetails: Constructed userChatInfoList with ${userChatInfoList.size} items before sorting: ${userChatInfoList.joinToString {it.userModel.userName ?: "N/A" }}")
+                _userList.value = userChatInfoList.sortedByDescending { it.lastMessageTimeStamp }
+                // The existing log "Successfully updated _userList with X users" will confirm the final size after sorting.
 
             } catch (e: Exception) {
-                Log.e(TAG, "fetchUsersById: General error.", e)
-                _errorMessage.value = "Failed to load chat user details: ${e.message}"
-                _userList.value = emptyList()
+                Log.e(TAG, "fetchChatPartnersDetails: CRITICAL ERROR in main try-catch block.", e)
+                _errorMessage.value = "Failed to load chat users: ${e.message}"
+                _userList.value = emptyList() // Ensure list is empty on critical failure
             } finally {
                 _isLoading.value = false
+                Log.d(TAG, "fetchChatPartnersDetails: Finished. _isLoading is now false. Final _userList size: ${_userList.value.size}")
             }
         }
     }

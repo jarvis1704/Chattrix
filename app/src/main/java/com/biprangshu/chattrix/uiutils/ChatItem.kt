@@ -31,6 +31,7 @@ import com.biprangshu.chattrix.data.UserModel
 @Composable
 fun ChatItem(
     userItem: UserModel,
+    lastMessage: String? = null,
     onClick: () -> String,
     navController: NavController
 ) {
@@ -75,7 +76,7 @@ fun ChatItem(
 
             // Status or last message placeholder
             Text(
-                text = "Tap to start chatting",
+                text = lastMessage ?: "Tap to start chatting",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

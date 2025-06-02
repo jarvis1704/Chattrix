@@ -67,11 +67,11 @@ fun HomeScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
     val user = (authState as? AuthState.SignedIn)?.user
-    val currentUserList by mainActivityViewModel.userList.collectAsState()
+    val userChatInfoList by mainActivityViewModel.userList.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
 
-    Log.d("HomeScreen", "Recomposing. currentUserList size: ${currentUserList.size}, Content: ${currentUserList.joinToString { it.userName ?: "N/A" }}")
+    Log.d("HomeScreen", "Recomposing. currentUserList size: ${userChatInfoList.size}, Content: ${userChatInfoList.joinToString { it.userModel.userName?: "N/A" }}")
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -156,7 +156,7 @@ fun HomeScreen(
             }
 
             // Chat List
-            if (currentUserList.isEmpty()) {
+            if (userChatInfoList.isEmpty()) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -172,12 +172,13 @@ fun HomeScreen(
                 LazyColumn(
                     modifier = Modifier.weight(1f)
                 ) {
-                    items(currentUserList.size) { index ->
-                        val userItem = currentUserList[index]
+                    items(userChatInfoList.size) { index ->
+                        val chatInfo = userChatInfoList[index]
                         ChatItem(
-                            userItem = userItem,
-                            onClick = { "${ChattrixScreens.CHAT_SCREEN}/${userItem.userId}/${userItem.userName}" },
-                            navController = navController
+                            userItem = chatInfo.userModel,
+                            onClick = { "${ChattrixScreens.CHAT_SCREEN}/${chatInfo.userModel.userId}/${chatInfo.userModel.userName}" },
+                            navController = navController,
+                            lastMessage = chatInfo.lastMessageText
                         )
                     }
                 }
