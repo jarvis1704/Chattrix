@@ -25,7 +25,8 @@ class ChatViewModel @Inject constructor(
     val messages: StateFlow<List<MessageModel>> = _messages.asStateFlow()
 
     private var messageListener: ValueEventListener? = null
-    private val database = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
+    private var currentMessagesRef: com.google.firebase.database.DatabaseReference? = null // Store the reference
+    private val database = FirebaseDatabase.getInstance("https.://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
 
     fun sendMessage(recieverId: String, message: String){
         chatService.sendMessage(message = message, recieverId = recieverId){
@@ -38,13 +39,14 @@ class ChatViewModel @Inject constructor(
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
         val chatId= chatService.getChatId(currentUser.uid, otherUserId)
 
-        //remove previous message listener if exists
-        messageListener?.let {
-            database.getReference("chats/$chatId/messages").removeEventListener(it)
+
+        messageListener?.let { listener ->
+            currentMessagesRef?.removeEventListener(listener)
         }
 
-        //set up new message listener
-        messageListener = database.getReference("chats/$chatId/messages").orderByChild("timestamp")
+
+        currentMessagesRef = database.getReference("chats/$chatId/messages")
+        messageListener = currentMessagesRef!!.orderByChild("timestamp")
             .addValueEventListener(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val messageList = mutableListOf<MessageModel>()
@@ -65,8 +67,10 @@ class ChatViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        messageListener?.let {
-            database.getReference("chats").removeEventListener(it)
+        messageListener?.let { listener ->
+            currentMessagesRef?.removeEventListener(listener)
         }
+        messageListener = null
+        currentMessagesRef = null
     }
 }

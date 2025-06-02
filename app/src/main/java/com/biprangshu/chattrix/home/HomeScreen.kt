@@ -1,5 +1,6 @@
 package com.biprangshu.chattrix.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -69,6 +70,8 @@ fun HomeScreen(
     val currentUserList by mainActivityViewModel.userList.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
+
+    Log.d("HomeScreen", "Recomposing. currentUserList size: ${currentUserList.size}, Content: ${currentUserList.joinToString { it.userName ?: "N/A" }}")
 
     Surface(
         modifier = Modifier.fillMaxSize()

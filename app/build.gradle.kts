@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
-    alias(libs.plugins.androidx.navigation.safe.args)  // Use this instead of "androidx.navigation.safe.args"
+    alias(libs.plugins.androidx.navigation.safe.args)
     id("kotlin-kapt")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("kotlin-parcelize")
