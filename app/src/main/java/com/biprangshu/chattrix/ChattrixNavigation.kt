@@ -23,6 +23,7 @@ import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
 import com.biprangshu.chattrix.home.ChatScreen
 import com.biprangshu.chattrix.home.HomeScreen
+import com.biprangshu.chattrix.home.NewChatScreen
 import com.biprangshu.chattrix.onboarding.LoginScreen
 import com.biprangshu.chattrix.onboarding.LoginWithEmail
 import com.biprangshu.chattrix.onboarding.OnBoardingScreens
@@ -149,6 +150,15 @@ fun ChattrixNavigation(
                 navController = navController,
                 userId = userId,
                 userName = userName
+            )
+        }
+
+        //new chat screen
+        composable(
+            route = ChattrixScreens.NEW_CHAT_SCREEN
+        ) {
+            NewChatScreen(
+                navController= navController
             )
         }
     }

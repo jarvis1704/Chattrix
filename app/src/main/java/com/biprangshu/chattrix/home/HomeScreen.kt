@@ -181,7 +181,7 @@ fun HomeScreen(
             }
 
             FloatingActionButton(
-                onClick = {},
+                onClick = {navController.navigate(ChattrixScreens.NEW_CHAT_SCREEN)},
                 modifier = Modifier.offset(x=150.dp, y= (-70).dp),
                 elevation = FloatingActionButtonDefaults.elevation(
                     defaultElevation = 15.dp
