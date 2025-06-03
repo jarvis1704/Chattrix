@@ -3,7 +3,9 @@ package com.biprangshu.chattrix.services
 import com.biprangshu.chattrix.data.MessageModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+
 
 class ChatService @Inject constructor(
     private val database: FirebaseDatabase,
@@ -19,6 +21,9 @@ class ChatService @Inject constructor(
         }
     }
 
+    private var _messageId: String = ""
+    private var _chatId: String = ""
+
     //send message
     fun sendMessage(message: String, recieverId: String, onComplete: (Boolean)->Unit){
         val currentUser = auth.currentUser?: return
@@ -27,6 +32,9 @@ class ChatService @Inject constructor(
 
         val messageId=messagesref.push().key ?: return
         val timeStamp= System.currentTimeMillis()
+
+        _messageId=messageId
+        _chatId=chatId
 
         val messageModel= MessageModel(
             messageId = messageId,
@@ -41,6 +49,15 @@ class ChatService @Inject constructor(
             .addOnFailureListener { onComplete(false) }
 
     }
+
+    fun getMessageId(): String {
+        return _messageId
+    }
+
+    fun getChatId(): String{
+        return _chatId
+    }
+
 
     // Mark message as read
     fun markMessageAsRead(chatId: String, messageId: String) {

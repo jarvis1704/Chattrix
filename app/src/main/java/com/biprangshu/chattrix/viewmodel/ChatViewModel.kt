@@ -65,8 +65,12 @@ class ChatViewModel @Inject constructor(
             })
     }
 
-    fun isMessageRead(){
-        //TODO implement message read function
+    private val _messageId= chatService.getMessageId()
+
+    private val _chatId= chatService.getChatId()
+
+    fun messageSeen(){
+        chatService.markMessageAsRead(chatId = _chatId, messageId = _messageId)
     }
 
     override fun onCleared() {

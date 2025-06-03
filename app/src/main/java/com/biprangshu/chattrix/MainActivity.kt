@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
+import com.biprangshu.chattrix.services.ChatService
 import com.biprangshu.chattrix.ui.theme.ChattrixTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -18,7 +19,7 @@ class MainActivity : ComponentActivity() {
             ChattrixTheme {
                 val navController = rememberNavController()
                 ChattrixNavigation(
-                    navController = navController
+                    navController = navController,
                 )
             }
         }

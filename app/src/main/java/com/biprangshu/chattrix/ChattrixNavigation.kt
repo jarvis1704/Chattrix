@@ -30,6 +30,7 @@ import com.biprangshu.chattrix.onboarding.OnBoardingScreens
 import com.biprangshu.chattrix.onboarding.OtpScreen
 import com.biprangshu.chattrix.onboarding.SignUpPage
 import com.biprangshu.chattrix.profile.UserProfileScreen
+import com.biprangshu.chattrix.services.ChatService
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 
@@ -37,7 +38,7 @@ import com.google.android.gms.common.api.ApiException
 fun ChattrixNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -115,13 +116,7 @@ fun ChattrixNavigation(
         composable(route = ChattrixScreens.HOME_SCREEN) {
             HomeScreen(
                 authViewModel = authViewModel,
-                onSignOut = {
-                    authViewModel.signOut()
-                    navController.navigate(ChattrixScreens.LOGIN_SCREEN) {
-                        popUpTo(ChattrixScreens.HOME_SCREEN) { inclusive = true }
-                    }
-                },
-                navController = navController
+                navController = navController,
             )
         }
 

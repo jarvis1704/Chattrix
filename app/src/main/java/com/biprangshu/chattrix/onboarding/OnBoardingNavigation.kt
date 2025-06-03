@@ -74,12 +74,6 @@ fun OnBoardingNavigation(modifier: Modifier = Modifier, navController: NavHostCo
         ) {
             HomeScreen(
                 authViewModel = authViewModel,
-                onSignOut = {
-                    authViewModel.signOut()
-                    navController.navigate(OnBoardingScreens.LOGIN_SCREEN) {
-                        popUpTo(OnBoardingScreens.HOME_SCREEN) { inclusive = true }
-                    }
-                },
                 navController = navController
 
             )

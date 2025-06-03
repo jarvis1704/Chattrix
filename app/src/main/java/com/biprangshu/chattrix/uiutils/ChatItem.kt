@@ -26,9 +26,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.data.UserModel
+import com.biprangshu.chattrix.services.ChatService
+import com.biprangshu.chattrix.viewmodel.ChatViewModel
 
 @Composable
 fun ChatItem(
@@ -36,13 +39,15 @@ fun ChatItem(
     lastMessage: String? = null,
     onClick: () -> String,
     navController: NavController,
-    isMessageRead: Boolean = false
+    isMessageRead: Boolean = false,
+    chatViewModel: ChatViewModel = hiltViewModel()
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
                 navController.navigate(onClick())
+                chatViewModel.messageSeen()
             }
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically

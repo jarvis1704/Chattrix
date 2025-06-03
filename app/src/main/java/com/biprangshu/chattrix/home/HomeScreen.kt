@@ -15,12 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -29,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -49,7 +45,7 @@ import com.biprangshu.chattrix.ChattrixScreens
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
-import com.biprangshu.chattrix.data.UserModel
+import com.biprangshu.chattrix.services.ChatService
 import com.biprangshu.chattrix.uiutils.ChatItem
 import com.biprangshu.chattrix.viewmodel.MainActivityViewModel
 import java.text.SimpleDateFormat
@@ -63,7 +59,6 @@ fun HomeScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     mainActivityViewModel: MainActivityViewModel = hiltViewModel(),
     navController: NavController,
-    onSignOut: () -> Unit
 ) {
     val authState by authViewModel.authState.collectAsState()
     val user = (authState as? AuthState.SignedIn)?.user
@@ -178,7 +173,8 @@ fun HomeScreen(
                             userItem = chatInfo.userModel,
                             onClick = { "${ChattrixScreens.CHAT_SCREEN}/${chatInfo.userModel.userId}/${chatInfo.userModel.userName}" },
                             navController = navController,
-                            lastMessage = chatInfo.lastMessageText
+                            lastMessage = chatInfo.lastMessageText,
+                            isMessageRead = chatInfo.isMessageSeen,
                         )
                     }
                 }
