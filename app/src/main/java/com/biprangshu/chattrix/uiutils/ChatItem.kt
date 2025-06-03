@@ -30,7 +30,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.data.UserModel
-import com.biprangshu.chattrix.services.ChatService
 import com.biprangshu.chattrix.viewmodel.ChatViewModel
 
 @Composable
@@ -95,7 +94,7 @@ fun ChatItem(
         Spacer(Modifier.width(8.dp))
         if(isMessageRead){
             Box(
-                modifier = Modifier.size(15.dp).clip(CircleShape).background(color = Color.Blue, CircleShape),
+                modifier = Modifier.size(40.dp).clip(CircleShape).background(color = Color.Blue, CircleShape),
             )
         }
 
