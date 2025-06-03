@@ -61,7 +61,7 @@ class ChatService @Inject constructor(
 
     // Mark message as read
     fun markMessageAsRead(chatId: String, messageId: String) {
-        database.getReference("chats/$chatId/messages/$messageId/isRead")
+        database.getReference("chats/$chatId/messages/$messageId/read")
             .setValue(true)
     }
 }

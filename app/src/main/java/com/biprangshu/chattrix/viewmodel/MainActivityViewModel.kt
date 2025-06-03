@@ -26,8 +26,6 @@ data class UserChatInfo(
     val lastMessageText: String = "Tap to start chatting",
     val lastMessageTimeStamp: Long =0L,
     val isMessageSeen: Boolean,
-    val chatId: String,
-    val messageId: String
 )
 
 @HiltViewModel
@@ -325,7 +323,6 @@ class MainActivityViewModel @Inject constructor(
                     var lastMsgText = "Tap to start chatting"
                     var lastMsgTimestamp = 0L
                     var messageSeen = false
-                    var messageId= ""
                     try {
                         Log.d(TAG, "fetchChatPartnersDetails: Attempting to fetch last message for chat $chatId")
                         val lastMessageSnapshot = realtimeDb.getReference("chats/$chatId/messages")
@@ -342,7 +339,6 @@ class MainActivityViewModel @Inject constructor(
                                 lastMsgText = senderPrefix + (messageData.message ?: "")
                                 lastMsgTimestamp = messageData.timestamp ?: 0L
                                 messageSeen= messageData.isRead
-                                messageId=messageData.messageId
                                 Log.d(TAG, "fetchChatPartnersDetails: Last message for $chatId: '$lastMsgText' (ts: $lastMsgTimestamp)")
                             } else {
                                 Log.w(TAG, "fetchChatPartnersDetails: Failed to convert last message snapshot to MessageModel for $chatId. Snapshot value: ${messageDataSnapshot.value}")
@@ -354,7 +350,7 @@ class MainActivityViewModel @Inject constructor(
                         Log.e(TAG, "fetchChatPartnersDetails: Error fetching last message for chat $chatId", e)
                         // Continue to add user with default message text
                     }
-                    userChatInfoList.add(UserChatInfo(userModel, lastMsgText, lastMsgTimestamp, messageSeen, chatId = chatId, messageId = messageId))
+                    userChatInfoList.add(UserChatInfo(userModel, lastMsgText, lastMsgTimestamp, messageSeen))
                 }
 
                 Log.d(TAG, "fetchChatPartnersDetails: Constructed userChatInfoList with ${userChatInfoList.size} items before sorting: ${userChatInfoList.joinToString {it.userModel.userName ?: "N/A" }}")
