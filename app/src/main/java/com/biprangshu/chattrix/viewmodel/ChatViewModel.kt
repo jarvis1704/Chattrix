@@ -65,6 +65,10 @@ class ChatViewModel @Inject constructor(
             })
     }
 
+    fun isMessageRead(){
+        //TODO implement message read function
+    }
+
     override fun onCleared() {
         super.onCleared()
         messageListener?.let { listener ->
