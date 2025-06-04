@@ -34,6 +34,10 @@ class AuthViewModel @Inject constructor(
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
     val authState: StateFlow<AuthState> = _authState
 
+    // Add a separate state for profile updates
+    private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Initial)
+    val updateState: StateFlow<UpdateState> = _updateState
+
     private val googleSignInClient: GoogleSignInClient by lazy {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(application.getString(R.string.default_web_client_id))
@@ -168,11 +172,44 @@ class AuthViewModel @Inject constructor(
             }
     }
 
-    fun updateUserName(displayName: String){
+    fun updateUserName(displayName: String) {
         val user = auth.currentUser
-        val db= FirebaseFirestore.getInstance()
+        if (user == null) {
+            _updateState.value = UpdateState.Error("No user signed in")
+            return
+        }
 
-        db.collection("users").document(user?.uid ?: "").update("userName", displayName)
+        _updateState.value = UpdateState.Loading
+
+
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(displayName)
+            .build()
+
+        user.updateProfile(profileUpdates)
+            .addOnCompleteListener { profileTask ->
+                if (profileTask.isSuccessful) {
+                    val db = FirebaseFirestore.getInstance()
+                    db.collection("users").document(user.uid)
+                        .update("userName", displayName)
+                        .addOnSuccessListener {
+                            Log.d("AuthViewModel", "Profile updated successfully")
+                            _updateState.value = UpdateState.Success
+                            // Force refresh the auth state to trigger UI update
+                            _authState.value = AuthState.SignedIn(auth.currentUser)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("AuthViewModel", "Failed to update Firestore", e)
+                            _updateState.value = UpdateState.Error("Failed to update profile: ${e.message}")
+                        }
+                } else {
+                    _updateState.value = UpdateState.Error("Failed to update profile: ${profileTask.exception?.message}")
+                }
+            }
+    }
+
+    fun resetUpdateState() {
+        _updateState.value = UpdateState.Initial
     }
 }
 
@@ -182,4 +219,11 @@ sealed class AuthState {
     object SignedOut : AuthState()
     data class SignedIn(val user: FirebaseUser?) : AuthState()
     data class Error(val message: String) : AuthState()
+}
+
+sealed class UpdateState {
+    object Initial : UpdateState()
+    object Loading : UpdateState()
+    object Success : UpdateState()
+    data class Error(val message: String) : UpdateState()
 }
