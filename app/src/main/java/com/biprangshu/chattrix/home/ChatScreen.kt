@@ -38,7 +38,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,6 +62,9 @@ fun ChatScreen(
     val messages by chatViewModel.messages.collectAsState()
     var messageText by remember { mutableStateOf("") }
     val currentUser = FirebaseAuth.getInstance().currentUser
+
+    val hapticFeedback= LocalHapticFeedback.current
+
 
     LaunchedEffect(key1 = userId) {
         chatViewModel.loadMessage(userId)
@@ -119,6 +124,7 @@ fun ChatScreen(
                     IconButton(
                         onClick = {
                             if (messageText.isNotBlank()) {
+                                hapticFeedback.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.TextHandleMove)
                                 chatViewModel.sendMessage(userId, messageText)
                                 messageText = ""
                             }
