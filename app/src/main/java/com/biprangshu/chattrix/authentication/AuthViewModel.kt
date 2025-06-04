@@ -159,7 +159,6 @@ class AuthViewModel @Inject constructor(
             userId = user.uid,
             userName = displayName.ifEmpty { user.displayName ?: "User" },
             profileImage = user.photoUrl?.toString(),
-            mobileNumber = user.phoneNumber
         )
         Log.d("AuthViewModel", "Saving user to Firestore: $userModel")
         db.collection("users").document(user.uid)

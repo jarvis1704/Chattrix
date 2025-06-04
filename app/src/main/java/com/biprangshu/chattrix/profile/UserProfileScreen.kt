@@ -131,13 +131,6 @@ fun UserProfileScreen(
                         Divider(modifier = Modifier.padding(vertical = 12.dp))
 
                         ProfileInfoItem(
-                            label = "Phone Number",
-                            value = user?.phoneNumber ?: "Not provided"
-                        )
-
-                        Divider(modifier = Modifier.padding(vertical = 12.dp))
-
-                        ProfileInfoItem(
                             label = "Account Created",
                             value = user?.metadata?.creationTimestamp?.let {
                                 formatTimestamp(it)
