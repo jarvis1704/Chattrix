@@ -3,7 +3,6 @@ package com.biprangshu.chattrix.services
 import com.biprangshu.chattrix.data.MessageModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 

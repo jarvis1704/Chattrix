@@ -322,7 +322,7 @@ class MainActivityViewModel @Inject constructor(
                     Log.d(TAG, "fetchChatPartnersDetails: Processing user ${userModel.userName} (partnerUid: $partnerUid), generating chatId: $chatId")
                     var lastMsgText = "Tap to start chatting"
                     var lastMsgTimestamp = 0L
-                    var messageSeen = false
+                    var messageSeen=true
                     try {
                         Log.d(TAG, "fetchChatPartnersDetails: Attempting to fetch last message for chat $chatId")
                         val lastMessageSnapshot = realtimeDb.getReference("chats/$chatId/messages")

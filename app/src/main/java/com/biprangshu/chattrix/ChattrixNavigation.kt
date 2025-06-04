@@ -29,6 +29,7 @@ import com.biprangshu.chattrix.onboarding.LoginWithEmail
 import com.biprangshu.chattrix.onboarding.OnBoardingScreens
 import com.biprangshu.chattrix.onboarding.OtpScreen
 import com.biprangshu.chattrix.onboarding.SignUpPage
+import com.biprangshu.chattrix.profile.EditProfileScreen
 import com.biprangshu.chattrix.profile.UserProfileScreen
 import com.biprangshu.chattrix.services.ChatService
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -155,6 +156,13 @@ fun ChattrixNavigation(
             NewChatScreen(
                 navController= navController
             )
+        }
+
+        //update chat screen
+        composable (
+            route= ChattrixScreens.EDIT_PROFILE_SCREEN
+        ){
+            EditProfileScreen(navController= navController)
         }
     }
 }

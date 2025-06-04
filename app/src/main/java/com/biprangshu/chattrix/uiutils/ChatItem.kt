@@ -92,7 +92,7 @@ fun ChatItem(
         }
 
         Spacer(Modifier.width(8.dp))
-        if(isMessageRead){
+        if(!isMessageRead){
             Box(
                 modifier = Modifier.size(40.dp).clip(CircleShape).background(color = Color.Blue, CircleShape),
             )

@@ -66,7 +66,7 @@ fun UserProfileScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Navigate to edit profile */ }) {
+                    IconButton(onClick = { navController.navigate(ChattrixScreens.EDIT_PROFILE_SCREEN) }) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit profile")
                     }
                 }

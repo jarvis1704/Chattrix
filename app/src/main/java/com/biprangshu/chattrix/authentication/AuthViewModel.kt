@@ -1,6 +1,5 @@
 package com.biprangshu.chattrix.authentication
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Intent
 import android.util.Log
@@ -167,6 +166,13 @@ class AuthViewModel @Inject constructor(
             .addOnFailureListener { e ->
                 Log.e("AuthViewModel", "Failed to save user to Firestore", e)
             }
+    }
+
+    fun updateUserName(displayName: String){
+        val user = auth.currentUser
+        val db= FirebaseFirestore.getInstance()
+
+        db.collection("users").document(user?.uid ?: "").update("userName", displayName)
     }
 }
 
