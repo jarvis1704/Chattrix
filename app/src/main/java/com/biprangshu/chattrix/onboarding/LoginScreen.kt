@@ -67,7 +67,7 @@ fun LoginScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp) // Constrain the height of the animation
+                    .height(300.dp)
             ) {
                 LottieAnimation(
                     composition = composition,
