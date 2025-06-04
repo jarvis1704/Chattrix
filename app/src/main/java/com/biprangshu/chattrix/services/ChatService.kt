@@ -41,6 +41,7 @@ class ChatService @Inject constructor(
             recieverId = recieverId,
             message = message,
             timestamp = timeStamp,
+            isRead = false
         )
 
         messagesref.child(messageId).setValue(messageModel)
@@ -58,9 +59,29 @@ class ChatService @Inject constructor(
     }
 
 
-    // Mark message as read
     fun markMessageAsRead(chatId: String, messageId: String) {
-        database.getReference("chats/$chatId/messages/$messageId/read")
+        database.getReference("chats/$chatId/messages/$messageId/isRead")
             .setValue(true)
+    }
+
+
+    fun markAllMessagesAsRead(chatId: String, currentUserId: String) {
+        database.getReference("chats/$chatId/messages")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    val updates = mutableMapOf<String, Any>()
+                    for (messageSnapshot in snapshot.children) {
+                        val message = messageSnapshot.getValue(MessageModel::class.java)
+
+                        if (message != null && message.senderId != currentUserId && message.isRead == false) {
+                            updates["${messageSnapshot.key}/isRead"] = true
+                        }
+                    }
+                    if (updates.isNotEmpty()) {
+                        database.getReference("chats/$chatId/messages").updateChildren(updates)
+                    }
+                }
+            }
     }
 }

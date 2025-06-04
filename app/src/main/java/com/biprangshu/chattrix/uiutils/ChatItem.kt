@@ -21,16 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.data.UserModel
-import com.biprangshu.chattrix.viewmodel.ChatViewModel
 
 @Composable
 fun ChatItem(
@@ -38,20 +35,18 @@ fun ChatItem(
     lastMessage: String? = null,
     onClick: () -> String,
     navController: NavController,
-    isMessageRead: Boolean = false,
-    chatViewModel: ChatViewModel = hiltViewModel()
+    isMessageRead: Boolean = true, // FIXED: Default to true (read) for new chats
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
                 navController.navigate(onClick())
-                chatViewModel.messageSeen()
             }
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Profile picture
+
         Box(
             modifier = Modifier
                 .size(50.dp)
@@ -68,11 +63,11 @@ fun ChatItem(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // User details
+
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            // User name
+
             Text(
                 text = userItem.userName ?: "Unknown User",
                 style = MaterialTheme.typography.titleMedium,
@@ -81,7 +76,7 @@ fun ChatItem(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Status or last message placeholder
+
             Text(
                 text = lastMessage ?: "Tap to start chatting",
                 style = MaterialTheme.typography.bodyMedium,
@@ -92,11 +87,15 @@ fun ChatItem(
         }
 
         Spacer(Modifier.width(8.dp))
+
+
         if(!isMessageRead){
             Box(
-                modifier = Modifier.size(40.dp).clip(CircleShape).background(color = Color.Blue, CircleShape),
+                modifier = Modifier
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(color = MaterialTheme.colorScheme.primary),
             )
         }
-
     }
 }

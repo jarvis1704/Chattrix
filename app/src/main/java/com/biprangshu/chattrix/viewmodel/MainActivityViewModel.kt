@@ -307,7 +307,6 @@ class MainActivityViewModel @Inject constructor(
                     return@launch
                 }
 
-
                 val userChatInfoList = mutableListOf<UserChatInfo>()
                 val currentUid = currentUser?.uid ?: run {
                     Log.e(TAG, "fetchChatPartnersDetails: Current user UID is null. Cannot proceed to fetch last messages.")
@@ -322,7 +321,8 @@ class MainActivityViewModel @Inject constructor(
                     Log.d(TAG, "fetchChatPartnersDetails: Processing user ${userModel.userName} (partnerUid: $partnerUid), generating chatId: $chatId")
                     var lastMsgText = "Tap to start chatting"
                     var lastMsgTimestamp = 0L
-                    var messageSeen=true
+                    var hasUnreadMessages = false // FIXED: Changed variable name for clarity
+
                     try {
                         Log.d(TAG, "fetchChatPartnersDetails: Attempting to fetch last message for chat $chatId")
                         val lastMessageSnapshot = realtimeDb.getReference("chats/$chatId/messages")
@@ -338,8 +338,11 @@ class MainActivityViewModel @Inject constructor(
                                 val senderPrefix = if (messageData.senderId == currentUid) "You: " else ""
                                 lastMsgText = senderPrefix + (messageData.message ?: "")
                                 lastMsgTimestamp = messageData.timestamp ?: 0L
-                                messageSeen= messageData.isRead
-                                Log.d(TAG, "fetchChatPartnersDetails: Last message for $chatId: '$lastMsgText' (ts: $lastMsgTimestamp)")
+
+
+                                hasUnreadMessages = messageData.senderId != currentUid && messageData.isRead == false
+
+                                Log.d(TAG, "fetchChatPartnersDetails: Last message for $chatId: '$lastMsgText' (ts: $lastMsgTimestamp), hasUnread: $hasUnreadMessages")
                             } else {
                                 Log.w(TAG, "fetchChatPartnersDetails: Failed to convert last message snapshot to MessageModel for $chatId. Snapshot value: ${messageDataSnapshot.value}")
                             }
@@ -348,14 +351,14 @@ class MainActivityViewModel @Inject constructor(
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "fetchChatPartnersDetails: Error fetching last message for chat $chatId", e)
-
                     }
-                    userChatInfoList.add(UserChatInfo(userModel, lastMsgText, lastMsgTimestamp, messageSeen))
+
+
+                    userChatInfoList.add(UserChatInfo(userModel, lastMsgText, lastMsgTimestamp, !hasUnreadMessages))
                 }
 
                 Log.d(TAG, "fetchChatPartnersDetails: Constructed userChatInfoList with ${userChatInfoList.size} items before sorting: ${userChatInfoList.joinToString {it.userModel.userName ?: "N/A" }}")
                 _userList.value = userChatInfoList.sortedByDescending { it.lastMessageTimeStamp }
-
 
             } catch (e: Exception) {
                 Log.e(TAG, "fetchChatPartnersDetails: CRITICAL ERROR in main try-catch block.", e)

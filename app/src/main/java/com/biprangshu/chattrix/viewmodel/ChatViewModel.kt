@@ -25,8 +25,12 @@ class ChatViewModel @Inject constructor(
     val messages: StateFlow<List<MessageModel>> = _messages.asStateFlow()
 
     private var messageListener: ValueEventListener? = null
-    private var currentMessagesRef: com.google.firebase.database.DatabaseReference? = null // Store the reference
+    private var currentMessagesRef: com.google.firebase.database.DatabaseReference? = null
     private val database = FirebaseDatabase.getInstance("https.://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
+
+
+    private var currentChatId: String = ""
+    private var currentUserId: String = ""
 
     fun sendMessage(recieverId: String, message: String){
         chatService.sendMessage(message = message, recieverId = recieverId){
@@ -37,13 +41,13 @@ class ChatViewModel @Inject constructor(
 
     fun loadMessage(otherUserId: String){
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        currentUserId = currentUser.uid
         val chatId= chatService.getChatId(currentUser.uid, otherUserId)
-
+        currentChatId = chatId
 
         messageListener?.let { listener ->
             currentMessagesRef?.removeEventListener(listener)
         }
-
 
         currentMessagesRef = database.getReference("chats/$chatId/messages")
         messageListener = currentMessagesRef!!.orderByChild("timestamp")
@@ -57,6 +61,9 @@ class ChatViewModel @Inject constructor(
                         }
                     }
                     _messages.value = messageList
+
+
+                    markAllMessagesAsRead()
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -65,12 +72,11 @@ class ChatViewModel @Inject constructor(
             })
     }
 
-    private val _messageId= chatService.getMessageId()
 
-    private val _chatId= chatService.getChatId()
-
-    fun messageSeen(){
-        chatService.markMessageAsRead(chatId = _chatId, messageId = _messageId)
+    private fun markAllMessagesAsRead() {
+        if (currentChatId.isNotEmpty() && currentUserId.isNotEmpty()) {
+            chatService.markAllMessagesAsRead(currentChatId, currentUserId)
+        }
     }
 
     override fun onCleared() {
