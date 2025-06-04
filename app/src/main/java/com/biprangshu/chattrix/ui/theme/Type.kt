@@ -51,7 +51,6 @@ val PoppinsFontFamily = FontFamily(
 
 //typography setup
 
-// Typography setup
 val ChatTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = PoppinsFontFamily,
