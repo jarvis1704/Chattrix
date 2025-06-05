@@ -49,6 +49,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -73,6 +75,8 @@ fun EditProfileScreen(
     var changedUserName by remember { mutableStateOf(user?.displayName ?: "Unknown User") }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    val hapticFeedback = LocalHapticFeedback.current
 
     // Handle update state changes
     LaunchedEffect(updateState) {
@@ -137,7 +141,10 @@ fun EditProfileScreen(
                         }
                     },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
+                        IconButton(onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            navController.popBackStack()
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Go back",
@@ -303,7 +310,10 @@ fun EditProfileScreen(
                         )
                     ) {
                         Button(
-                            onClick = { navController.popBackStack() },
+                            onClick = {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                navController.popBackStack()
+                                      },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
@@ -327,7 +337,10 @@ fun EditProfileScreen(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Button(
-                            onClick = { authViewModel.updateUserName(changedUserName) },
+                            onClick = {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                authViewModel.updateUserName(changedUserName)
+                                      },
                             modifier = Modifier.fillMaxWidth(),
                             enabled = updateState !is UpdateState.Loading &&
                                     changedUserName.isNotBlank() &&

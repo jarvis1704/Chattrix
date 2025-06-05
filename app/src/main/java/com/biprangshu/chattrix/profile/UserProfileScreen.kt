@@ -48,7 +48,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -68,6 +70,8 @@ fun UserProfileScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
     val user = (authState as? AuthState.SignedIn)?.user
+
+    val hapticFeedback = LocalHapticFeedback.current
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -99,7 +103,10 @@ fun UserProfileScreen(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
+                        IconButton(onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            navController.popBackStack()
+                        }) {
                             Icon(
                                 Icons.Default.ArrowBack,
                                 contentDescription = "Go back",
@@ -134,7 +141,7 @@ fun UserProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Enhanced Profile Image Section
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
@@ -219,7 +226,7 @@ fun UserProfileScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Enhanced User Info Cards
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -261,14 +268,17 @@ fun UserProfileScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Action Buttons
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Edit Profile Button
+
                     OutlinedButton(
-                        onClick = { navController.navigate(ChattrixScreens.EDIT_PROFILE_SCREEN) },
+                        onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            navController.navigate(ChattrixScreens.EDIT_PROFILE_SCREEN)
+                                  },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
@@ -288,7 +298,7 @@ fun UserProfileScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Enhanced Sign Out Button
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -298,6 +308,7 @@ fun UserProfileScreen(
                 ) {
                     TextButton(
                         onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                             authViewModel.signOut()
                             navController.navigate("loginscreen") {
                                 popUpTo(0) { inclusive = true }
