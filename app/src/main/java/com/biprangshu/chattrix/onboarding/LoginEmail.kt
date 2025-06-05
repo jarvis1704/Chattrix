@@ -47,7 +47,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -72,6 +74,7 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
     var password by remember { mutableStateOf("") }
 
     val authState= authViewModel.authState.collectAsState()
+    val hapticFeedback= LocalHapticFeedback.current
 
     when(authState.value){
         is AuthState.SignedIn -> {
@@ -224,7 +227,10 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                 ){
                     // Sign Up Button
                     Button(
-                        onClick = {authViewModel.loginWithEmail(email, password)},
+                        onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            authViewModel.loginWithEmail(email, password)
+                                  },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),

@@ -32,6 +32,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +51,7 @@ fun NewChatScreen(
 ) {
 
     val allUsersList by mainActivityViewModel.allUserList.collectAsState()
+    val hapticFeedback = LocalHapticFeedback.current
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -88,7 +91,10 @@ fun NewChatScreen(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = { navController.popBackStack() }
+                            onClick = {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                navController.popBackStack()
+                            }
                         ) {
                             Icon(
                                 Icons.Default.ArrowBack,

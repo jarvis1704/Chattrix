@@ -42,6 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +72,7 @@ fun LoginScreen(
     val authState by authViewModel.authState.collectAsState()
 
     var isVisible by remember { mutableStateOf(false) }
+    val hapticFeedback= LocalHapticFeedback.current
 
     LaunchedEffect(Unit) {
         delay(300)
@@ -182,7 +185,7 @@ fun LoginScreen(
                     }
                 }
 
-                // Bottom section with buttons
+
                 AnimatedVisibility(
                     visible = isVisible,
                     enter = slideInVertically(
@@ -301,6 +304,7 @@ fun LoginScreen(
                             // Email Sign In Button
                             OutlinedButton(
                                 onClick = {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     navController.navigate(route = OnBoardingScreens.LOGIN_EMAIL)
                                 },
                                 modifier = Modifier
@@ -334,6 +338,7 @@ fun LoginScreen(
                             // Sign Up Button
                             OutlinedButton(
                                 onClick = {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     navController.navigate(route = OnBoardingScreens.SIGNUP_SCREEN)
                                 },
                                 modifier = Modifier

@@ -3,7 +3,6 @@ package com.biprangshu.chattrix.home
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,17 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +28,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,8 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,7 +52,6 @@ import com.biprangshu.chattrix.ChattrixScreens
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
-import com.biprangshu.chattrix.services.ChatService
 import com.biprangshu.chattrix.uiutils.ChatItem
 import com.biprangshu.chattrix.viewmodel.MainActivityViewModel
 import java.text.SimpleDateFormat
@@ -76,6 +71,8 @@ fun HomeScreen(
     val userChatInfoList by mainActivityViewModel.userList.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
+
+    val hapticFeedback= LocalHapticFeedback.current
 
     Log.d("HomeScreen", "Recomposing. currentUserList size: ${userChatInfoList.size}, Content: ${userChatInfoList.joinToString { it.userModel.userName?: "N/A" }}")
 
@@ -135,6 +132,7 @@ fun HomeScreen(
                                     CircleShape
                                 )
                                 .clickable {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     navController.navigate(route = ChattrixScreens.PROFILE_SCREEN)
                                 }
                                 .padding(2.dp)
@@ -252,7 +250,10 @@ fun HomeScreen(
 
             // Enhanced Floating Action Button
             FloatingActionButton(
-                onClick = { navController.navigate(ChattrixScreens.NEW_CHAT_SCREEN) },
+                onClick = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    navController.navigate(ChattrixScreens.NEW_CHAT_SCREEN)
+                          },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(24.dp)
