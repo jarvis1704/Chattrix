@@ -1,9 +1,7 @@
-
 package com.biprangshu.chattrix.profile
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,12 +10,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -25,19 +33,24 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -56,82 +69,189 @@ fun UserProfileScreen(
     val authState by authViewModel.authState.collectAsState()
     val user = (authState as? AuthState.SignedIn)?.user
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Profile") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Go back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { navController.navigate(ChattrixScreens.EDIT_PROFILE_SCREEN) }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit profile")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        Surface(
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .statusBarsPadding()
+                .navigationBarsPadding()
         ) {
+            // Enhanced Top App Bar
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "Profile",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = "Go back",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = { navController.navigate(ChattrixScreens.EDIT_PROFILE_SCREEN) }
+                        ) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Edit profile",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+                )
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Profile Image
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(vertical = 24.dp)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.user),
-                        contentDescription = "Profile picture",
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
-                        contentScale = ContentScale.Crop,
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.primary)
-                    )
-                }
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // User Name
-                Text(
-                    text = user?.displayName ?: "Unknown User",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // User Email
-                Text(
-                    text = user?.email ?: "No email available",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // User Info Card
+                // Enhanced Profile Image Section
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    shape = RoundedCornerShape(20.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        ProfileInfoItem(label = "User ID", value = user?.uid ?: "Unknown")
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Profile Image with enhanced styling
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.padding(vertical = 16.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(140.dp)
+                                    .shadow(12.dp, CircleShape)
+                                    .background(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                            )
+                                        ),
+                                        shape = CircleShape
+                                    )
+                                    .padding(6.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.user),
+                                    contentDescription = "Profile picture",
+                                    modifier = Modifier
+                                        .size(120.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.surface),
+                                    contentScale = ContentScale.Crop,
+                                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
+                                        MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                            }
+                        }
 
-                        Divider(modifier = Modifier.padding(vertical = 12.dp))
+                        // User Name
+                        Text(
+                            text = user?.displayName ?: "Unknown User",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // User Email with icon
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Email,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = user?.email ?: "No email available",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Enhanced User Info Cards
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            "Account Information",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
 
                         ProfileInfoItem(
-                            label = "Account Created",
+                            icon = Icons.Default.Person,
+                            label = "User ID",
+                            value = user?.uid?.take(12) + "..." ?: "Unknown"
+                        )
+
+                        Divider(
+                            modifier = Modifier.padding(vertical = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+
+                        ProfileInfoItem(
+                            icon = Icons.Filled.Person,
+                            label = "Member Since",
                             value = user?.metadata?.creationTimestamp?.let {
                                 formatTimestamp(it)
                             } ?: "Unknown"
@@ -139,43 +259,115 @@ fun UserProfileScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // Sign Out Button
-                TextButton(
-                    onClick = {
-                        authViewModel.signOut()
-                        navController.navigate("loginscreen") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp)
+                // Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("Sign Out")
+                    // Edit Profile Button
+                    OutlinedButton(
+                        onClick = { navController.navigate(ChattrixScreens.EDIT_PROFILE_SCREEN) },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .padding(end = 4.dp)
+                        )
+                        Text("Edit Profile")
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Enhanced Sign Out Button
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
+                    )
+                ) {
+                    TextButton(
+                        onClick = {
+                            authViewModel.signOut()
+                            navController.navigate("loginscreen") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.ExitToApp,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .padding(end = 8.dp)
+                        )
+                        Text(
+                            "Sign Out",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
 @Composable
-fun ProfileInfoItem(label: String, value: String) {
+fun ProfileInfoItem(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
 
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp)
         )
     }
 }
