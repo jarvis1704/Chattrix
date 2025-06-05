@@ -1,6 +1,12 @@
 package com.biprangshu.chattrix.onboarding
 
 import android.widget.Toast
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,12 +17,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,10 +44,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
@@ -69,56 +93,159 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
         else -> Unit
     }
 
+    var isFocused by remember { mutableStateOf(false) }
+
+
+    val borderColor by animateColorAsState(
+        targetValue = if (isFocused) Color(0xFF3F51B5) else Color.Gray,
+        label = "BorderColorAnimation"
+    )
+
 
     Surface(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(16.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Top
-        ) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ){
             Box(
-                modifier = Modifier.fillMaxWidth().height(300.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.03f)
+                            )
+                        )
+                    )
+            )
+
+            Column(
+                modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                LottieAnimation(
-                    composition = composition,
-                    iterations = LottieConstants.IterateForever,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-            Spacer(Modifier.height(24.dp))
-            Text("Enter your Email")
-            Spacer(Modifier.height(16.dp))
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Your Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-            )
-            Spacer(Modifier.height(16.dp))
-            Text("Enter your Password")
-            Spacer(Modifier.height(16.dp))
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Your Password") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = PasswordVisualTransformation()
-            )
-            Spacer(Modifier.height(48.dp))
-            Box (
-                modifier = Modifier.fillMaxWidth().height(100.dp),
-                contentAlignment = Alignment.Center
-            ){
-                Button(onClick = {
-                    authViewModel.loginWithEmail(email, password)
-                },
-                    enabled = authState.value!= AuthState.Loading
+
+                Card(
+                    modifier = Modifier.fillMaxWidth().height(280.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(300.dp)
                     ) {
-                    Text("Log In")
+                        LottieAnimation(
+                            composition = composition,
+                            iterations = LottieConstants.IterateForever,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth().height(350.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor= MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        verticalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Column {
+                            Text("Enter your Email", fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = email,
+                                onValueChange = { email = it },
+                                label = { Text("Your Email") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier.fillMaxWidth().onFocusChanged { isFocused = it.isFocused },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Email, contentDescription = "Email icon")
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = borderColor,
+                                    unfocusedBorderColor = borderColor
+                                )
+                            )
+                        }
+
+                        Column() {
+                            Text("Enter your Password", fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = password,
+                                onValueChange = { password = it },
+                                label = { Text("Your Password") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                                visualTransformation = PasswordVisualTransformation(),
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier.fillMaxWidth().onFocusChanged { isFocused = it.isFocused },
+                                leadingIcon = {
+                                    Icon(Icons.Filled.Lock, contentDescription = "Lock icon")
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = borderColor,
+                                    unfocusedBorderColor = borderColor
+                                )
+                            )
+                        }
+
+
+                    }
+                }
+
+
+
+                Spacer(Modifier.height(24.dp))
+                Box (
+                    modifier = Modifier.fillMaxWidth().height(100.dp),
+                    contentAlignment = Alignment.Center
+                ){
+                    // Sign Up Button
+                    Button(
+                        onClick = {authViewModel.loginWithEmail(email, password)},
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 2.dp,
+                            pressedElevation = 4.dp
+                        )
+                    ) {
+                        Text(
+                            text = "Log In",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
+
     }
 }
