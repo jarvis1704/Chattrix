@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.ChattrixScreens
@@ -61,6 +62,7 @@ import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
 import com.biprangshu.chattrix.home.formatTimestamp
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,10 +82,9 @@ fun UserProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            // Enhanced Top App Bar
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
@@ -96,8 +97,8 @@ fun UserProfileScreen(
                     title = {
                         Text(
                             "Profile",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold
+                            style = ChatTypography.headlineLarge.copy(
+                                fontSize = 24.sp
                             ),
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -116,7 +117,10 @@ fun UserProfileScreen(
                     },
                     actions = {
                         IconButton(
-                            onClick = { navController.navigate(ChattrixScreens.EDIT_PROFILE_SCREEN) }
+                            onClick = {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                navController.navigate(ChattrixScreens.EDIT_PROFILE_SCREEN)
+                            }
                         ) {
                             Icon(
                                 Icons.Default.Edit,
@@ -156,7 +160,7 @@ fun UserProfileScreen(
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Profile Image with enhanced styling
+
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.padding(vertical = 16.dp)
@@ -192,18 +196,16 @@ fun UserProfileScreen(
                             }
                         }
 
-                        // User Name
+
                         Text(
                             text = user?.displayName ?: "Unknown User",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
+                            style = ChatTypography.headlineMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // User Email with icon
+
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
@@ -217,7 +219,7 @@ fun UserProfileScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = user?.email ?: "No email available",
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = ChatTypography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -238,8 +240,8 @@ fun UserProfileScreen(
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             "Account Information",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold
+                            style = ChatTypography.headlineMedium.copy(
+                                fontSize = 18.sp
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = 16.dp)
@@ -289,10 +291,12 @@ fun UserProfileScreen(
                             Icons.Default.Edit,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(18.dp)
+                                .size(24.dp)
                                 .padding(end = 4.dp)
                         )
-                        Text("Edit Profile")
+                        Text("Edit Profile", style = ChatTypography.headlineMedium.copy(
+                            fontSize = 18.sp
+                        ))
                     }
                 }
 
@@ -324,14 +328,14 @@ fun UserProfileScreen(
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier
-                                .size(18.dp)
+                                .size(28.dp)
                                 .padding(end = 8.dp)
                         )
                         Text(
                             "Sign Out",
                             color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium
+                            style = ChatTypography.headlineMedium.copy(
+                                fontSize = 18.sp
                             )
                         )
                     }
@@ -367,16 +371,14 @@ fun ProfileInfoItem(
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium
-                ),
+                style = ChatTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
 
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
+            style = ChatTypography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 16.dp)
         )

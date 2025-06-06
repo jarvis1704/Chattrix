@@ -46,12 +46,14 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.ChattrixScreens
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 import com.biprangshu.chattrix.uiutils.ChatItem
 import com.biprangshu.chattrix.viewmodel.MainActivityViewModel
 import java.text.SimpleDateFormat
@@ -89,7 +91,7 @@ fun HomeScreen(
                     .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // App Header with gradient background
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -110,14 +112,13 @@ fun HomeScreen(
                         Column {
                             Text(
                                 "Chattrix",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                style = ChatTypography.headlineLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontSize = 32.sp
                             )
                             Text(
                                 "Stay connected",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = ChatTypography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
                         }
@@ -155,7 +156,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Chat Header with better styling
+
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
@@ -165,15 +166,13 @@ fun HomeScreen(
                 ) {
                     Text(
                         "Recent Chats",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
+                        style = ChatTypography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Text(
                         "${userChatInfoList.size} chats",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = ChatTypography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
                 }

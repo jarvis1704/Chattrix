@@ -58,6 +58,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 
 @Composable
 fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel= hiltViewModel()) {
@@ -185,11 +186,12 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Column {
-                            Text("Enter your Email", fontSize = 20.sp,
+                            Text("Enter your Email",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
-                                textAlign = TextAlign.Start
+                                textAlign = TextAlign.Start,
+                                style = ChatTypography.headlineLarge
                             )
                             Spacer(Modifier.height(8.dp))
                             OutlinedTextField(
@@ -210,11 +212,12 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                         }
 
                         Column {
-                            Text("Choose a Password", fontSize = 20.sp,
+                            Text("Choose a Password",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
-                                textAlign = TextAlign.Start
+                                textAlign = TextAlign.Start,
+                                style = ChatTypography.headlineLarge
                             )
                             Spacer(Modifier.height(8.dp))
                             OutlinedTextField(
@@ -236,11 +239,12 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                         }
 
                         Column {
-                            Text("What should we call you?", fontSize = 20.sp,
+                            Text("What should we call you?",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
-                                textAlign = TextAlign.Start
+                                textAlign = TextAlign.Start,
+                                style= ChatTypography.headlineMedium
                             )
                             Spacer(Modifier.height(8.dp))
                             OutlinedTextField(
@@ -292,7 +296,8 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                         Text(
                             text = "Sign Up",
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            style = ChatTypography.headlineLarge
                         )
                     }
                 }

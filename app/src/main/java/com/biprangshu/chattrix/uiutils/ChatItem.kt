@@ -23,11 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.data.UserModel
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 
 @Composable
 fun ChatItem(
@@ -35,7 +38,7 @@ fun ChatItem(
     lastMessage: String? = null,
     onClick: () -> String,
     navController: NavController,
-    isMessageRead: Boolean = true, // FIXED: Default to true (read) for new chats
+    isMessageRead: Boolean = true,
 ) {
     Row(
         modifier = Modifier
@@ -70,8 +73,10 @@ fun ChatItem(
 
             Text(
                 text = userItem.userName ?: "Unknown User",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = ChatTypography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -79,10 +84,11 @@ fun ChatItem(
 
             Text(
                 text = lastMessage ?: "Tap to start chatting",
-                style = MaterialTheme.typography.bodyMedium,
+                style = ChatTypography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                fontSize = 14.sp
             )
         }
 

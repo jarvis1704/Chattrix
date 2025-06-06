@@ -36,9 +36,11 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.ChattrixScreens
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 import com.biprangshu.chattrix.uiutils.ChatItem
 import com.biprangshu.chattrix.viewmodel.MainActivityViewModel
 
@@ -60,10 +62,9 @@ fun NewChatScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            // Enhanced Top App Bar
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
@@ -77,14 +78,13 @@ fun NewChatScreen(
                         Column {
                             Text(
                                 "New Chat",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                style = ChatTypography.headlineLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontSize = 24.sp
                             )
                             Text(
                                 "Select someone to chat with",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = ChatTypography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
                         }

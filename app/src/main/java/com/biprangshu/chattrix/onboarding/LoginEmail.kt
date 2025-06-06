@@ -2,10 +2,6 @@ package com.biprangshu.chattrix.onboarding
 
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,12 +25,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -66,6 +60,7 @@ import com.biprangshu.chattrix.ChattrixScreens
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 
 @Composable
 fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel= hiltViewModel()) {
@@ -166,10 +161,11 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                         verticalArrangement = Arrangement.SpaceEvenly
                     ) {
                         Column {
-                            Text("Enter your Email", fontSize = 24.sp,
+                            Text("Enter your Email",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
+                                style = ChatTypography.headlineLarge
                             )
                             Spacer(Modifier.height(12.dp))
                             OutlinedTextField(
@@ -190,10 +186,11 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                         }
 
                         Column() {
-                            Text("Enter your Password", fontSize = 24.sp,
+                            Text("Enter your Password",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
+                                style = ChatTypography.headlineLarge
                             )
                             Spacer(Modifier.height(12.dp))
                             OutlinedTextField(
@@ -246,7 +243,8 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                         Text(
                             text = "Log In",
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            style = ChatTypography.headlineLarge
                         )
                     }
                 }

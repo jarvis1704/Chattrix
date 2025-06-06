@@ -63,10 +63,12 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.data.MessageModel
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 import com.biprangshu.chattrix.viewmodel.ChatViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -158,13 +160,13 @@ fun ChatScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
                                     "Start the conversation",
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = ChatTypography.headlineMedium,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     "Send your first message to $userName",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = ChatTypography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                                 )
                             }
@@ -214,7 +216,9 @@ fun ChatScreen(
                             placeholder = {
                                 Text(
                                     "Type a message...",
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    style = ChatTypography.headlineMedium,
+                                    fontSize = 14.sp
                                 )
                             },
                             modifier = Modifier.weight(1f),
@@ -225,7 +229,11 @@ fun ChatScreen(
                                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                                 unfocusedContainerColor = MaterialTheme.colorScheme.surface
                             ),
-                            maxLines = 4
+                            maxLines = 4,
+                            textStyle = ChatTypography.headlineMedium.copy(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Normal
+                            )
                         )
 
                         Spacer(Modifier.width(12.dp))
@@ -336,10 +344,9 @@ fun TopAppBar(
                 Column {
                     Text(
                         text = userName,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = ChatTypography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 18.sp
                     )
                 }
             }
@@ -389,7 +396,7 @@ fun MessageItem(
             ) {
                 Text(
                     text = message.message,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = ChatTypography.bodyLarge,
                     color = if (isFromMe)
                         MaterialTheme.colorScheme.onPrimary
                     else
@@ -400,9 +407,7 @@ fun MessageItem(
 
                 Text(
                     text = formatTimestamp(message.timestamp),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Light
-                    ),
+                    style = ChatTypography.labelSmall,
                     color = if (isFromMe)
                         MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                     else

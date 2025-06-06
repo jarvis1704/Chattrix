@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -58,6 +59,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.biprangshu.chattrix.R
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 import kotlinx.coroutines.delay
 
 @Composable
@@ -162,7 +164,8 @@ fun LoginScreen(
                             text = "Welcome to",
                             fontSize = 20.sp,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            style = ChatTypography.headlineLarge
                         )
 
                         Text(
@@ -170,17 +173,18 @@ fun LoginScreen(
                             fontSize = 36.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            style = ChatTypography.headlineLarge
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             text = "Connect, chat, and collaborate with ease",
-                            fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                             textAlign = TextAlign.Center,
-                            lineHeight = 22.sp
+                            lineHeight = 22.sp,
+                            style = ChatTypography.bodyLarge
                         )
                     }
                 }
@@ -229,13 +233,12 @@ fun LoginScreen(
                                     Image(
                                         painter = painterResource(R.drawable.googlelogo),
                                         contentDescription = "Google logo",
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(28.dp)
                                     )
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Text(
                                         text = "Continue with Google",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium
+                                        style = ChatTypography.titleMedium
                                     )
                                 }
                             }
@@ -322,13 +325,13 @@ fun LoginScreen(
                                     Image(
                                         painter = painterResource(R.drawable.maillogo),
                                         contentDescription = "Email logo",
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(28.dp),
+                                        colorFilter = ColorFilter.tint(Color.White)
                                     )
-                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Spacer(modifier = Modifier.width(10.dp))
                                     Text(
                                         text = "Continue with Email",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium
+                                        style = ChatTypography.titleMedium
                                     )
                                 }
                             }
@@ -352,7 +355,8 @@ fun LoginScreen(
                                 Text(
                                     text = "Create New Account",
                                     fontSize = 15.sp,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    style = ChatTypography.titleMedium
                                 )
                             }
                         }

@@ -32,7 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -54,11 +53,13 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.biprangshu.chattrix.authentication.AuthState
 import com.biprangshu.chattrix.authentication.AuthViewModel
 import com.biprangshu.chattrix.authentication.UpdateState
+import com.biprangshu.chattrix.ui.theme.ChatTypography
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +79,7 @@ fun EditProfileScreen(
 
     val hapticFeedback = LocalHapticFeedback.current
 
-    // Handle update state changes
+
     LaunchedEffect(updateState) {
         when (updateState) {
             is UpdateState.Success -> {
@@ -111,10 +112,8 @@ fun EditProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            // Enhanced Top App Bar
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
@@ -128,14 +127,14 @@ fun EditProfileScreen(
                         Column {
                             Text(
                                 "Edit Profile",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold
+                                style = ChatTypography.headlineLarge.copy(
+                                    fontSize = 24.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
                                 "Update your information",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = ChatTypography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
                         }
@@ -167,7 +166,7 @@ fun EditProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Profile Edit Form Card
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -179,7 +178,7 @@ fun EditProfileScreen(
                     Column(
                         modifier = Modifier.padding(24.dp)
                     ) {
-                        // Section Header
+
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(bottom = 20.dp)
@@ -193,14 +192,14 @@ fun EditProfileScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 "Personal Information",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
+                                style = ChatTypography.headlineMedium.copy(
+                                    fontSize = 20.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
-                        // Username Field
+
                         Text(
                             "Display Name",
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -247,7 +246,7 @@ fun EditProfileScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Current Email Display (Read-only)
+
                         Text(
                             "Email Address",
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -284,7 +283,7 @@ fun EditProfileScreen(
                                 )
                             }
                         }
-
+                        Spacer(Modifier.height(8.dp))
                         Text(
                             "Email cannot be changed",
                             style = MaterialTheme.typography.bodySmall,
@@ -296,7 +295,7 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Action Buttons
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -324,8 +323,8 @@ fun EditProfileScreen(
                         ) {
                             Text(
                                 "Cancel",
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Medium
+                                style = ChatTypography.headlineMedium.copy(
+                                    fontSize = 18.sp
                                 )
                             )
                         }
@@ -367,8 +366,8 @@ fun EditProfileScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "Save Changes",
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = FontWeight.Medium
+                                    style = ChatTypography.headlineMedium.copy(
+                                        fontSize = 14.sp
                                     )
                                 )
                             }
