@@ -4,15 +4,32 @@ import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -31,9 +48,175 @@ import com.biprangshu.chattrix.onboarding.OtpScreen
 import com.biprangshu.chattrix.onboarding.SignUpPage
 import com.biprangshu.chattrix.profile.EditProfileScreen
 import com.biprangshu.chattrix.profile.UserProfileScreen
-import com.biprangshu.chattrix.services.ChatService
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+
+
+object AnimationConstants {
+    const val DURATION_SHORT = 200
+    const val DURATION_MEDIUM = 300
+    const val DURATION_LONG = 400
+    const val SCALE_INITIAL = 0.95f
+    const val OFFSET_FULL = 1000
+    const val OFFSET_PARTIAL = 300
+}
+
+
+object NavigationAnimations {
+
+    fun slideInFromRight(): EnterTransition = slideInHorizontally(
+        initialOffsetX = { it },
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    ) + fadeIn(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = 0,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    fun slideOutToLeft(): ExitTransition = slideOutHorizontally(
+        targetOffsetX = { -it },
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    ) + fadeOut(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = AnimationConstants.DURATION_SHORT,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    fun slideInFromLeft(): EnterTransition = slideInHorizontally(
+        initialOffsetX = { -it },
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    ) + fadeIn(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = 0,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    fun slideOutToRight(): ExitTransition = slideOutHorizontally(
+        targetOffsetX = { it },
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    ) + fadeOut(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = AnimationConstants.DURATION_SHORT,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+
+    fun scaleSlideInFromBottom(): EnterTransition = slideInVertically(
+        initialOffsetY = { AnimationConstants.OFFSET_PARTIAL },
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    ) + scaleIn(
+        initialScale = AnimationConstants.SCALE_INITIAL,
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    ) + fadeIn(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = 0,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    fun scaleSlideOutToTop(): ExitTransition = slideOutVertically(
+        targetOffsetY = { -AnimationConstants.OFFSET_PARTIAL },
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    ) + scaleOut(
+        targetScale = AnimationConstants.SCALE_INITIAL,
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    ) + fadeOut(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = AnimationConstants.DURATION_SHORT,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    fun modalSlideInFromBottom(): EnterTransition = slideInVertically(
+        initialOffsetY = { it },
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_LONG,
+            easing = FastOutSlowInEasing
+        )
+    ) + fadeIn(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = 0,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    fun modalSlideOutToBottom(): ExitTransition = slideOutVertically(
+        targetOffsetY = { it },
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_LONG,
+            easing = FastOutSlowInEasing
+        )
+    ) + fadeOut(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    fun gentleFadeIn(): EnterTransition = fadeIn(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            delayMillis = 0,
+            easing = LinearOutSlowInEasing
+        )
+    ) + scaleIn(
+        initialScale = 0.98f,
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_MEDIUM,
+            easing = FastOutSlowInEasing
+        )
+    )
+
+    fun gentleFadeOut(): ExitTransition = fadeOut(
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            delayMillis = AnimationConstants.DURATION_SHORT,
+            easing = LinearOutSlowInEasing
+        )
+    ) + scaleOut(
+        targetScale = 0.98f,
+        animationSpec = tween(
+            durationMillis = AnimationConstants.DURATION_SHORT,
+            easing = FastOutSlowInEasing
+        )
+    )
+}
 
 @Composable
 fun ChattrixNavigation(
@@ -73,96 +256,153 @@ fun ChattrixNavigation(
         }
     }
 
-    // Show loading while checking auth state
+    // Enhanced loading screen with consistent background
     if (authState is AuthState.Initial || authState is AuthState.Loading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary
+            )
         }
         return
     }
 
-    // Use a fixed start destination and handle navigation once NavHost is set up
-    NavHost(
-        navController = navController,
-        startDestination = ChattrixScreens.LOGIN_SCREEN
-    ){
-        // Login screen
-        composable(route = ChattrixScreens.LOGIN_SCREEN) {
-            LoginScreen(
-                navController = navController,
-                onSignInClick = {
-                    launcher.launch(authViewModel.getSignInIntent())
-                },
-                onNavigateToHome = {
-                    navController.navigate(ChattrixScreens.HOME_SCREEN) {
-                        popUpTo(ChattrixScreens.LOGIN_SCREEN) {
-                            inclusive = true
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        NavHost(
+            navController = navController,
+            startDestination = ChattrixScreens.LOGIN_SCREEN,
+            modifier = Modifier.fillMaxSize()
+        ) {
+
+            // Login screen
+            composable(
+                route = ChattrixScreens.LOGIN_SCREEN,
+                enterTransition = { NavigationAnimations.gentleFadeIn() },
+                exitTransition = { NavigationAnimations.gentleFadeOut() }
+            ) {
+                LoginScreen(
+                    navController = navController,
+                    onSignInClick = {
+                        launcher.launch(authViewModel.getSignInIntent())
+                    },
+                    onNavigateToHome = {
+                        navController.navigate(ChattrixScreens.HOME_SCREEN) {
+                            popUpTo(ChattrixScreens.LOGIN_SCREEN) {
+                                inclusive = true
+                            }
                         }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        // Login with email
-        composable(route = OnBoardingScreens.LOGIN_EMAIL) {
-            LoginWithEmail(navController = navController)
-        }
+            // Login with email
+            composable(
+                route = OnBoardingScreens.LOGIN_EMAIL,
+                enterTransition = { NavigationAnimations.slideInFromRight() },
+                exitTransition = { NavigationAnimations.slideOutToLeft() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeft() },
+                popExitTransition = { NavigationAnimations.slideOutToRight() }
+            ) {
+                LoginWithEmail(navController = navController)
+            }
 
-        // OTP verification screen
-        composable(route = OnBoardingScreens.OTP_SCREEN) {
-            OtpScreen(navController = navController)
-        }
+            // OTP verification screen
+            composable(
+                route = OnBoardingScreens.OTP_SCREEN,
+                enterTransition = { NavigationAnimations.slideInFromRight() },
+                exitTransition = { NavigationAnimations.slideOutToLeft() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeft() },
+                popExitTransition = { NavigationAnimations.slideOutToRight() }
+            ) {
+                OtpScreen(navController = navController)
+            }
 
-        // Home screen
-        composable(route = ChattrixScreens.HOME_SCREEN) {
-            HomeScreen(
-                authViewModel = authViewModel,
-                navController = navController,
-            )
-        }
+            // SignUp screen
+            composable(
+                route = OnBoardingScreens.SIGNUP_SCREEN,
+                enterTransition = { NavigationAnimations.slideInFromRight() },
+                exitTransition = { NavigationAnimations.slideOutToLeft() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeft() },
+                popExitTransition = { NavigationAnimations.slideOutToRight() }
+            ) {
+                SignUpPage(navController = navController)
+            }
 
-        //SignUp screen
-        composable(route= OnBoardingScreens.SIGNUP_SCREEN) {
-            SignUpPage(
-                navController = navController
-            )
-        }
+            // Home screen
+            composable(
+                route = ChattrixScreens.HOME_SCREEN,
+                enterTransition = { NavigationAnimations.scaleSlideInFromBottom() },
+                exitTransition = { NavigationAnimations.slideOutToLeft() },
+                popEnterTransition = { NavigationAnimations.scaleSlideInFromBottom() },
+                popExitTransition = { NavigationAnimations.scaleSlideOutToTop() }
+            ) {
+                HomeScreen(
+                    authViewModel = authViewModel,
+                    navController = navController,
+                )
+            }
 
-        composable(route= ChattrixScreens.PROFILE_SCREEN) {
-            UserProfileScreen(navController = navController)
-        }
+            // Profile screen
+            composable(
+                route = ChattrixScreens.PROFILE_SCREEN,
+                enterTransition = { NavigationAnimations.modalSlideInFromBottom() },
+                exitTransition = { NavigationAnimations.modalSlideOutToBottom() },
+                popEnterTransition = { NavigationAnimations.modalSlideInFromBottom() },
+                popExitTransition = { NavigationAnimations.modalSlideOutToBottom() }
+            ) {
+                UserProfileScreen(navController = navController)
+            }
 
-        // Chat screen with userId and userName
-        composable(
-            route = "${ChattrixScreens.CHAT_SCREEN}/{userId}/{userName}",
-            arguments = listOf(
-                navArgument("userId") { type = NavType.StringType },
-                navArgument("userName") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId") ?: ""
-            val userName = backStackEntry.arguments?.getString("userName") ?: ""
-            ChatScreen(
-                navController = navController,
-                userId = userId,
-                userName = userName
-            )
-        }
+            // Edit Profile screen
+            composable(
+                route = ChattrixScreens.EDIT_PROFILE_SCREEN,
+                enterTransition = { NavigationAnimations.slideInFromRight() },
+                exitTransition = { NavigationAnimations.slideOutToLeft() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeft() },
+                popExitTransition = { NavigationAnimations.slideOutToRight() }
+            ) {
+                EditProfileScreen(navController = navController)
+            }
 
-        //new chat screen
-        composable(
-            route = ChattrixScreens.NEW_CHAT_SCREEN
-        ) {
-            NewChatScreen(
-                navController= navController
-            )
-        }
+            // Chat screen
+            composable(
+                route = "${ChattrixScreens.CHAT_SCREEN}/{userId}/{userName}",
+                arguments = listOf(
+                    navArgument("userId") { type = NavType.StringType },
+                    navArgument("userName") { type = NavType.StringType }
+                ),
+                enterTransition = { NavigationAnimations.slideInFromRight() },
+                exitTransition = { NavigationAnimations.slideOutToLeft() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeft() },
+                popExitTransition = { NavigationAnimations.slideOutToRight() }
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: ""
+                val userName = backStackEntry.arguments?.getString("userName") ?: ""
+                ChatScreen(
+                    navController = navController,
+                    userId = userId,
+                    userName = userName
+                )
+            }
 
-        //update chat screen
-        composable (
-            route= ChattrixScreens.EDIT_PROFILE_SCREEN
-        ){
-            EditProfileScreen(navController= navController)
+            // New chat screen
+            composable(
+                route = ChattrixScreens.NEW_CHAT_SCREEN,
+                enterTransition = { NavigationAnimations.modalSlideInFromBottom() },
+                exitTransition = { NavigationAnimations.modalSlideOutToBottom() },
+                popEnterTransition = { NavigationAnimations.modalSlideInFromBottom() },
+                popExitTransition = { NavigationAnimations.modalSlideOutToBottom() }
+            ) {
+                NewChatScreen(navController = navController)
+            }
         }
     }
 }
