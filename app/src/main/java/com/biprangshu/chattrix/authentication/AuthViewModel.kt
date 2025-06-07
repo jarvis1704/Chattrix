@@ -105,6 +105,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    //sign in with google
     fun signInWithGoogle(context: Context) {
         _authState.value = AuthState.Loading
 
