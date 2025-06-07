@@ -105,14 +105,13 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    //sign in with google
     fun signInWithGoogle(context: Context) {
         _authState.value = AuthState.Loading
 
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
+            .setFilterByAuthorizedAccounts(false) // Start with false to show account picker
             .setServerClientId(getApplication<Application>().getString(R.string.default_web_client_id))
-            .setAutoSelectEnabled(false)
+            .setAutoSelectEnabled(false) // Disable auto-select to always show account picker
             .build()
 
         val request = GetCredentialRequest.Builder()
@@ -131,7 +130,7 @@ class AuthViewModel @Inject constructor(
 
                 when (e) {
                     is NoCredentialException -> {
-
+                        // Try again with filterByAuthorizedAccounts = true if first attempt failed
                         retryGoogleSignInWithFilteredAccounts(context)
                     }
                     else -> {
