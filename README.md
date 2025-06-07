@@ -13,9 +13,23 @@ A modern, real-time chat application built with Jetpack Compose and Firebase for
 - **Haptic Feedback**: Enhanced user experience with tactile feedback
 - **Status Indicators**: Read/unread message status
 
-## 🚀 Screenshots
+🚀 Screenshots
+<div align="center">
+<img src="https://github.com/user-attachments/assets/7560305f-ebb8-461c-a055-bfea029f50bf" alt="Main Screen" width="300"/>
 
-*Add your app screenshots here*
+<img src="https://github.com/user-attachments/assets/f38b463c-9e01-44ab-a3d8-65834c028e40" alt="Feature Screen" width="300"/>
+
+<img src="https://github.com/user-attachments/assets/18ac4c50-d063-4edc-8e51-a150deddc062" alt="Navigation Screen" width="300"/>
+</div>
+<div align="center">
+
+<img src="https://github.com/user-attachments/assets/f4e3f89c-7ad8-4c85-9e5e-76cfa830dac3" alt="View 1" width="250"/> <img src="https://github.com/user-attachments/assets/e5d02655-b8fa-4a84-bb22-41f3ce7c1045" alt="View 2" width="250"/> <img src="https://github.com/user-attachments/assets/a9e055e5-4f00-4448-bda9-8600ae7aa0f8" alt="View 3" width="250"/>
+
+<img src="https://github.com/user-attachments/assets/7dc57608-07aa-4356-8aa2-53d6287ef287" alt="Settings Screen" width="300"/>
+</div>
+
+
+
 
 ## 🛠️ Tech Stack
 
