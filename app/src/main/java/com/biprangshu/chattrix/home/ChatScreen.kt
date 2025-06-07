@@ -6,10 +6,10 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -90,14 +89,12 @@ fun ChatScreen(
 
     val hapticFeedback = LocalHapticFeedback.current
 
-
     val sendButtonScale = remember { Animatable(1f) }
     val sendButtonRotation = remember { Animatable(0f) }
 
     LaunchedEffect(key1 = userId) {
         chatViewModel.loadMessage(userId)
     }
-
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
@@ -108,8 +105,7 @@ fun ChatScreen(
     }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 navController = navController,
@@ -121,8 +117,8 @@ fun ChatScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPaddingValues).statusBarsPadding()
-                .navigationBarsPadding(),
+                .padding(innerPaddingValues) // Use padding from scaffold
+                .navigationBarsPadding(), // Pad for bottom navigation bar
             color = MaterialTheme.colorScheme.background
         ) {
             Column(
@@ -179,7 +175,7 @@ fun ChatScreen(
                             .weight(1f)
                             .fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp)
+                        contentPadding = PaddingValues(vertical = 8.dp)
                     ) {
                         items(messages.size) { index ->
                             val message = messages[index]
@@ -194,7 +190,6 @@ fun ChatScreen(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -238,12 +233,10 @@ fun ChatScreen(
 
                         Spacer(Modifier.width(12.dp))
 
-
                         FloatingActionButton(
                             onClick = {
                                 if (messageText.isNotBlank()) {
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-
 
                                     coroutineScope.launch {
                                         launch {
@@ -298,7 +291,6 @@ fun ChatScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }

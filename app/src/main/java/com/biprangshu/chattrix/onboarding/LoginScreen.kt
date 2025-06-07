@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -72,6 +74,7 @@ fun LoginScreen(
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.chatanimation_1))
     val authState by authViewModel.authState.collectAsState()
+    val scrollState = rememberScrollState()
 
     var isVisible by remember { mutableStateOf(false) }
     val hapticFeedback= LocalHapticFeedback.current
@@ -112,10 +115,10 @@ fun LoginScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(scrollState)
                     .statusBarsPadding()
                     .navigationBarsPadding()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AnimatedVisibility(
@@ -130,7 +133,9 @@ fun LoginScreen(
                     ) {
                         // Animation container
                         Card(
-                            modifier = Modifier.fillMaxWidth().height(280.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(280.dp),
                             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                             shape = RoundedCornerShape(24.dp),
                             colors = CardDefaults.cardColors(
@@ -138,15 +143,17 @@ fun LoginScreen(
                             )
                         ) {
                             Box(
-                                modifier = Modifier.fillMaxSize().background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
-                                            MaterialTheme.colorScheme.background,
-                                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.03f)
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors = listOf(
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                                                MaterialTheme.colorScheme.background,
+                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.03f)
+                                            )
                                         )
-                                    )
-                                ),
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 LottieAnimation(
@@ -189,6 +196,7 @@ fun LoginScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.weight(1f))
 
                 AnimatedVisibility(
                     visible = isVisible,
@@ -362,6 +370,7 @@ fun LoginScreen(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

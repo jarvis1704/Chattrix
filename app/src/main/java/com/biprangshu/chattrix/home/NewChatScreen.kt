@@ -51,7 +51,6 @@ fun NewChatScreen(
     mainActivityViewModel: MainActivityViewModel = hiltViewModel(),
     navController: NavController
 ) {
-
     val allUsersList by mainActivityViewModel.allUserList.collectAsState()
     val hapticFeedback = LocalHapticFeedback.current
 
@@ -64,7 +63,6 @@ fun NewChatScreen(
                 .fillMaxSize()
                 .navigationBarsPadding()
         ) {
-
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
@@ -110,12 +108,12 @@ fun NewChatScreen(
                 )
             }
 
+            // The main content area
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .weight(1f) // Fills remaining space after the TopAppBar
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
-                // Contact count and info
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
@@ -142,7 +140,7 @@ fun NewChatScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Users list with enhanced styling
+                // Users list
                 if (allUsersList.isEmpty()) {
                     Card(
                         modifier = Modifier
@@ -159,7 +157,8 @@ fun NewChatScreen(
                         ) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(16.dp) // Add padding for content
                             ) {
                                 Icon(
                                     Icons.Default.Person,

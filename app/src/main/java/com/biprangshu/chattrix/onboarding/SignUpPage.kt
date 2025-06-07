@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -69,6 +71,7 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
     var userName by remember { mutableStateOf("") }
     val authState = authViewModel.authState.collectAsState()
     val hapticFeedback = LocalHapticFeedback.current
+    val scrollState = rememberScrollState()
 
     when (val state = authState.value) {
         is AuthState.SignedIn -> {
@@ -126,16 +129,19 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(scrollState)
                     .statusBarsPadding()
                     .navigationBarsPadding()
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceAround
+                verticalArrangement = Arrangement.Top
             ) {
 
                 if (authState.value is AuthState.Loading) {
                     Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
@@ -146,7 +152,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                     Text(
                         text = it,
                         color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -189,7 +197,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                             Text("Enter your Email",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(end = 8.dp),
                                 textAlign = TextAlign.Start,
                                 style = ChatTypography.headlineLarge
                             )
@@ -200,7 +210,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                                 label = { Text("Your Email") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                                 shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.fillMaxWidth().onFocusChanged { isEmailFocused = it.isFocused },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onFocusChanged { isEmailFocused = it.isFocused },
                                 leadingIcon = {
                                     Icon(Icons.Default.Email, contentDescription = "Email icon")
                                 },
@@ -215,7 +227,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                             Text("Choose a Password",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(end = 8.dp),
                                 textAlign = TextAlign.Start,
                                 style = ChatTypography.headlineLarge
                             )
@@ -227,7 +241,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                                 visualTransformation = PasswordVisualTransformation(),
                                 shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.fillMaxWidth().onFocusChanged { isPasswordFocused = it.isFocused },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onFocusChanged { isPasswordFocused = it.isFocused },
                                 leadingIcon = {
                                     Icon(Icons.Filled.Lock, contentDescription = "Lock icon")
                                 },
@@ -242,7 +258,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                             Text("What should we call you?",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(end = 8.dp),
                                 textAlign = TextAlign.Start,
                                 style= ChatTypography.headlineMedium
                             )
@@ -253,7 +271,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                                 label = { Text("Your Name") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                                 shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.fillMaxWidth().onFocusChanged { isUsernameFocused = it.isFocused },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onFocusChanged { isUsernameFocused = it.isFocused },
                                 leadingIcon = {
                                     Icon(Icons.Filled.Person, contentDescription = "Username icon")
                                 },
@@ -269,7 +289,9 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                 Spacer(Modifier.height(20.dp))
 
                 Box (
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     contentAlignment = Alignment.Center
                 ){
                     Button(
@@ -301,6 +323,7 @@ fun SignUpPage(modifier: Modifier = Modifier, navController: NavController, auth
                         )
                     }
                 }
+                Spacer(Modifier.height(16.dp))
             }
         }
     }

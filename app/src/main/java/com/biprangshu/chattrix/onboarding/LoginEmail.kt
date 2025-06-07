@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -67,6 +69,7 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.email_password))
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     val authState= authViewModel.authState.collectAsState()
     val hapticFeedback= LocalHapticFeedback.current
@@ -91,14 +94,20 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
         else -> Unit
     }
 
-    var isFocused by remember { mutableStateOf(false) }
+
+    var isEmailFocused by remember { mutableStateOf(false) }
+    var isPasswordFocused by remember { mutableStateOf(false) }
 
 
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) Color(0xFF3F51B5) else Color.Gray,
-        label = "BorderColorAnimation"
+    val emailBorderColor by animateColorAsState(
+        targetValue = if (isEmailFocused) MaterialTheme.colorScheme.primary else Color.Gray,
+        label = "EmailBorderColorAnimation"
     )
 
+    val passwordBorderColor by animateColorAsState(
+        targetValue = if (isPasswordFocused) MaterialTheme.colorScheme.primary else Color.Gray,
+        label = "PasswordBorderColorAnimation"
+    )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -122,13 +131,24 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
             )
 
             Column(
-                modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Top
             ) {
 
+                if (authState.value is AuthState.Loading) {
+                    CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                }
+
                 Card(
-                    modifier = Modifier.fillMaxWidth().height(280.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(280.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
@@ -136,7 +156,9 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                     )
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(300.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
                     ) {
                         LottieAnimation(
                             composition = composition,
@@ -149,7 +171,7 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                 Spacer(Modifier.height(24.dp))
 
                 Card(
-                    modifier = Modifier.fillMaxWidth().height(350.dp),
+                    modifier = Modifier.fillMaxWidth(), // REMOVED fixed height
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
@@ -157,14 +179,17 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                     )
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        verticalArrangement = Arrangement.SpaceEvenly
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
                         Column {
                             Text("Enter your Email",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start,
                                 style = ChatTypography.headlineLarge
                             )
                             Spacer(Modifier.height(12.dp))
@@ -174,22 +199,25 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                                 label = { Text("Your Email") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                                 shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.fillMaxWidth().onFocusChanged { isFocused = it.isFocused },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onFocusChanged { isEmailFocused = it.isFocused },
                                 leadingIcon = {
                                     Icon(Icons.Default.Email, contentDescription = "Email icon")
                                 },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = borderColor,
-                                    unfocusedBorderColor = borderColor
+                                    focusedBorderColor = emailBorderColor,
+                                    unfocusedBorderColor = emailBorderColor
                                 )
                             )
                         }
 
-                        Column() {
+                        Column {
                             Text("Enter your Password",
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start,
                                 style = ChatTypography.headlineLarge
                             )
                             Spacer(Modifier.height(12.dp))
@@ -200,34 +228,33 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                                 visualTransformation = PasswordVisualTransformation(),
                                 shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.fillMaxWidth().onFocusChanged { isFocused = it.isFocused },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onFocusChanged { isPasswordFocused = it.isFocused },
                                 leadingIcon = {
                                     Icon(Icons.Filled.Lock, contentDescription = "Lock icon")
                                 },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = borderColor,
-                                    unfocusedBorderColor = borderColor
+                                    focusedBorderColor = passwordBorderColor,
+                                    unfocusedBorderColor = passwordBorderColor
                                 )
                             )
                         }
-
-
                     }
                 }
 
-
-
                 Spacer(Modifier.height(24.dp))
+
                 Box (
-                    modifier = Modifier.fillMaxWidth().height(100.dp),
+                    modifier = Modifier.fillMaxWidth(), // REMOVED fixed height
                     contentAlignment = Alignment.Center
                 ){
-                    // Sign Up Button
                     Button(
                         onClick = {
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                             authViewModel.loginWithEmail(email, password)
-                                  },
+                        },
+                        enabled = authState.value != AuthState.Loading && email.isNotEmpty() && password.isNotEmpty(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -248,8 +275,8 @@ fun LoginWithEmail(modifier: Modifier = Modifier, navController: NavController, 
                         )
                     }
                 }
+                Spacer(Modifier.height(16.dp))
             }
         }
-
     }
 }

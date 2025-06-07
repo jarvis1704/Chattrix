@@ -17,11 +17,13 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,11 +33,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val auth: FirebaseAuth = Firebase.auth,
+    private val auth: FirebaseAuth,
     application: Application
 ) : AndroidViewModel(application) {
-
-    constructor(application: Application) : this(Firebase.auth, application)
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
     val authState: StateFlow<AuthState> = _authState
@@ -61,57 +61,54 @@ class AuthViewModel @Inject constructor(
                 if (task.isSuccessful) {
                     _authState.value = AuthState.SignedIn(auth.currentUser)
                 } else {
-                    _authState.value = AuthState.Error(task.exception?.message ?: "Login failed")
+                    val errorMessage = task.exception?.message ?: "Login failed. Please check your credentials."
+                    _authState.value = AuthState.Error(errorMessage)
                 }
             }
     }
 
     fun signupWithEmail(email: String, password: String, displayName: String) {
-        if (email.isEmpty() || password.isEmpty()) {
-            _authState.value = AuthState.Error("Email and Password cannot be empty")
+        if (email.isEmpty() || password.isEmpty() || displayName.isEmpty()) {
+            _authState.value = AuthState.Error("All fields must be filled")
             return
         }
 
         _authState.value = AuthState.Loading
 
-        try {
-            auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val user = auth.currentUser
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    val profileUpdates = UserProfileChangeRequest.Builder()
+                        .setDisplayName(displayName)
+                        .build()
 
-                        val profileUpdates = UserProfileChangeRequest.Builder()
-                            .setDisplayName(displayName)
-                            .build()
-
-                        user?.updateProfile(profileUpdates)?.addOnCompleteListener {
+                    user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileUpdateTask ->
+                        if(profileUpdateTask.isSuccessful) {
                             user.let { saveUserToFirestore(it, displayName) }
+                            _authState.value = AuthState.SignedIn(user)
+                        } else {
+                            _authState.value = AuthState.SignedIn(user)
+                            Log.e("AuthViewModel", "User profile update failed", profileUpdateTask.exception)
                         }
-                        _authState.value = AuthState.SignedIn(user)
-                    } else {
-                        val exception = task.exception
-                        val errorMessage = when {
-                            exception is java.net.UnknownHostException ||
-                                    exception is java.net.SocketTimeoutException ||
-                                    exception?.message?.contains("network") == true ->
-                                "Network error: Please check your internet connection"
-                            else -> exception?.message ?: "Signup failed"
-                        }
-                        _authState.value = AuthState.Error(errorMessage)
                     }
+                } else {
+                    val exception = task.exception
+                    val errorMessage = when (exception) {
+                        is FirebaseAuthUserCollisionException -> "An account already exists with this email address."
+                        else -> exception?.message ?: "Signup failed. Please try again."
+                    }
+                    _authState.value = AuthState.Error(errorMessage)
                 }
-        } catch (e: Exception) {
-            _authState.value = AuthState.Error("Unexpected error: ${e.message}")
-        }
+            }
     }
 
     fun signInWithGoogle(context: Context) {
         _authState.value = AuthState.Loading
 
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false) // Start with false to show account picker
+            .setFilterByAuthorizedAccounts(false)
             .setServerClientId(getApplication<Application>().getString(R.string.default_web_client_id))
-            .setAutoSelectEnabled(false) // Disable auto-select to always show account picker
             .build()
 
         val request = GetCredentialRequest.Builder()
@@ -120,64 +117,22 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val result = credentialManager.getCredential(
-                    request = request,
-                    context = context
-                )
+                val result = credentialManager.getCredential(context = context, request)
                 handleGoogleSignInResult(result)
             } catch (e: GetCredentialException) {
-                Log.e("AuthViewModel", "Google Sign-In failed", e)
-
-                when (e) {
-                    is NoCredentialException -> {
-                        // Try again with filterByAuthorizedAccounts = true if first attempt failed
-                        retryGoogleSignInWithFilteredAccounts(context)
+                Log.e("AuthViewModel", "Google Sign-In GetCredentialException", e)
+                val errorMessage = when (e) {
+                    is NoCredentialException -> "No Google accounts found on this device. Please add an account in your device settings."
+                    else -> if (e.message?.contains("canceled", ignoreCase = true) == true) {
+                        "Sign-in was canceled."
+                    } else {
+                        "An error occurred during sign-in. Please try again."
                     }
-                    else -> {
-                        val errorMessage = when {
-                            e.message?.contains("canceled") == true -> "Sign-in was canceled"
-                            e.message?.contains("network") == true -> "Network error. Please check your connection"
-                            else -> "Google sign-in failed: ${e.message}"
-                        }
-                        _authState.value = AuthState.Error(errorMessage)
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("AuthViewModel", "Unexpected error during Google Sign-In", e)
-                _authState.value = AuthState.Error("Unexpected error: ${e.message}")
-            }
-        }
-    }
-
-    private fun retryGoogleSignInWithFilteredAccounts(context: Context) {
-        Log.d("AuthViewModel", "Retrying Google Sign-In with filtered accounts")
-
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(true) // Try with filtered accounts as fallback
-            .setServerClientId(getApplication<Application>().getString(R.string.default_web_client_id))
-            .setAutoSelectEnabled(true)
-            .build()
-
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-
-        viewModelScope.launch {
-            try {
-                val result = credentialManager.getCredential(
-                    request = request,
-                    context = context
-                )
-                handleGoogleSignInResult(result)
-            } catch (e: GetCredentialException) {
-                Log.e("AuthViewModel", "Google Sign-In retry failed", e)
-                val errorMessage = when {
-                    e.message?.contains("No credentials available") == true ->
-                        "No Google accounts found. Please add a Google account to your device and try again."
-                    e.message?.contains("canceled") == true -> "Sign-in was canceled"
-                    else -> "Google sign-in failed: ${e.message}"
                 }
                 _authState.value = AuthState.Error(errorMessage)
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Unexpected error during Google Sign-In", e)
+                _authState.value = AuthState.Error("An unexpected error occurred: ${e.message}")
             }
         }
     }
@@ -196,7 +151,7 @@ class AuthViewModel @Inject constructor(
                                 if (task.isSuccessful) {
                                     val user = auth.currentUser
                                     user?.let {
-                                        saveUserToFirestore(it, user.displayName ?: "User")
+                                        saveUserToFirestore(it, it.displayName ?: "User")
                                     }
                                     _authState.value = AuthState.SignedIn(user)
                                 } else {
@@ -205,23 +160,21 @@ class AuthViewModel @Inject constructor(
                             }
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e("AuthViewModel", "Invalid Google ID token response", e)
-                        _authState.value = AuthState.Error("Invalid Google ID token")
+                        _authState.value = AuthState.Error("Failed to verify Google Sign-In. Please try again.")
                     }
                 } else {
                     Log.e("AuthViewModel", "Unexpected credential type: ${credential.type}")
-                    _authState.value = AuthState.Error("Unexpected credential type")
+                    _authState.value = AuthState.Error("An unsupported credential type was received.")
                 }
             }
             else -> {
                 Log.e("AuthViewModel", "Unexpected credential type")
-                _authState.value = AuthState.Error("Unexpected credential type")
+                _authState.value = AuthState.Error("An unexpected error occurred during sign-in.")
             }
         }
     }
 
     fun checkAuthState() {
-        _authState.value = AuthState.Loading
-
         viewModelScope.launch {
             val currentUser = auth.currentUser
             _authState.value = if (currentUser != null) {
@@ -235,13 +188,11 @@ class AuthViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             try {
-                credentialManager.clearCredentialState(
-                    androidx.credentials.ClearCredentialStateRequest()
-                )
-                auth.signOut()
-                _authState.value = AuthState.SignedOut
+
+                credentialManager.clearCredentialState(androidx.credentials.ClearCredentialStateRequest())
             } catch (e: Exception) {
-                Log.e("AuthViewModel", "Error during sign out", e)
+                Log.e("AuthViewModel", "Error clearing credential state during sign out", e)
+            } finally {
                 auth.signOut()
                 _authState.value = AuthState.SignedOut
             }
@@ -256,10 +207,12 @@ class AuthViewModel @Inject constructor(
             profileImage = user.photoUrl?.toString(),
         )
         Log.d("AuthViewModel", "Saving user to Firestore: $userModel")
+
+
         db.collection("users").document(user.uid)
-            .set(userModel)
+            .set(userModel, SetOptions.merge())
             .addOnSuccessListener {
-                Log.d("AuthViewModel", "User saved to Firestore successfully")
+                Log.d("AuthViewModel", "User saved/updated in Firestore successfully")
             }
             .addOnFailureListener { e ->
                 Log.e("AuthViewModel", "Failed to save user to Firestore", e)
@@ -286,14 +239,14 @@ class AuthViewModel @Inject constructor(
                     db.collection("users").document(user.uid)
                         .update("userName", displayName)
                         .addOnSuccessListener {
-                            Log.d("AuthViewModel", "Profile updated successfully")
+                            Log.d("AuthViewModel", "Profile updated successfully in Auth and Firestore")
                             _updateState.value = UpdateState.Success
                             _authState.value = AuthState.SignedIn(auth.currentUser)
                         }
                         .addOnFailureListener { e ->
                             Log.e("AuthViewModel", "Failed to update Firestore", e)
                             _updateState.value =
-                                UpdateState.Error("Failed to update profile: ${e.message}")
+                                UpdateState.Error("Failed to update profile database: ${e.message}")
                         }
                 } else {
                     _updateState.value =
