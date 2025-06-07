@@ -38,34 +38,6 @@ A modern, real-time chat application built with Jetpack Compose and Firebase for
 - Kotlin 1.8+
 - Firebase Project Setup
 
-## 🔧 Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/chattrix.git
-   cd chattrix
-   ```
-
-2. **Firebase Setup**
-   - Create a new project in [Firebase Console](https://console.firebase.google.com/)
-   - Add an Android app to your Firebase project
-   - Download `google-services.json` and place it in the `app/` directory
-   - Enable Authentication and Firestore Database in Firebase Console
-
-3. **Configure Firebase Authentication**
-   - Go to Authentication > Sign-in method
-   - Enable Email/Password authentication
-   - Configure other sign-in methods as needed
-
-4. **Configure Firestore Database**
-   - Create a Firestore database
-   - Set up security rules (see [Security Rules](#security-rules) section)
-
-5. **Build and Run**
-   - Open the project in Android Studio
-   - Sync the project with Gradle files
-   - Run the app on an emulator or physical device
-
 ## 🏗️ Project Structure
 
 ```
@@ -81,33 +53,6 @@ app/
 │   ├── uiutils/                # Reusable UI components
 │   └── viewmodel/              # ViewModels for state management
 └── res/                        # Resources (layouts, strings, etc.)
-```
-
-## 🔐 Security Rules
-
-Add these Firestore security rules to your Firebase project:
-
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can read/write their own user document
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Chat messages - users can only access chats they're part of
-    match /chats/{chatId} {
-      allow read, write: if request.auth != null && 
-        (request.auth.uid in resource.data.participants);
-    }
-    
-    // Messages within chats
-    match /chats/{chatId}/messages/{messageId} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
 ```
 
 ## 🎨 Key Components
@@ -145,53 +90,10 @@ The app uses MVVM architecture with:
 4. **Send Messages**: Type and send messages in real-time
 5. **Profile**: Access your profile from the home screen
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Code Style
-- Follow Kotlin coding conventions
-- Use meaningful variable and function names
-- Add comments for complex logic
-- Ensure proper error handling
-
 ## 🐛 Known Issues
 
 - [ ] Message delivery status indicators (planned)
 - [ ] Image/media sharing (in development)
 - [ ] Group chat functionality (future release)
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Biprangshu**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
-
-## 🙏 Acknowledgments
-
-- Firebase team for excellent backend services
-- Jetpack Compose team for modern UI toolkit
-- Material Design team for design guidelines
-- Android development community for inspiration
-
-## 📱 Download
-
-*Add Google Play Store badge and link when published*
-
-## 🔄 Version History
-
-- **v1.0.0** - Initial release with core chat functionality
-- **v1.1.0** - Enhanced UI and performance improvements (planned)
-- **v2.0.0** - Group chat and media sharing (planned)
-
----
 
 *Built with ❤️ using Jetpack Compose*
