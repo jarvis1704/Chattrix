@@ -74,9 +74,12 @@ fun HomeScreen(
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
 
-    val hapticFeedback= LocalHapticFeedback.current
+    val hapticFeedback = LocalHapticFeedback.current
 
-    Log.d("HomeScreen", "Recomposing. currentUserList size: ${userChatInfoList.size}, Content: ${userChatInfoList.joinToString { it.userModel.userName?: "N/A" }}")
+    Log.d(
+        "HomeScreen",
+        "Recomposing. currentUserList size: ${userChatInfoList.size}, Content: ${userChatInfoList.joinToString { it.userModel.userName ?: "N/A" }}"
+    )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -155,7 +158,6 @@ fun HomeScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -236,7 +238,9 @@ fun HomeScreen(
                             ) {
                                 ChatItem(
                                     userItem = chatInfo.userModel,
-                                    onClick = { "${ChattrixScreens.CHAT_SCREEN}/${chatInfo.userModel.userId}/${chatInfo.userModel.userName}" },
+                                    onClick = {
+                                        "${ChattrixScreens.CHAT_SCREEN}/${chatInfo.userModel.userId}/${chatInfo.userModel.userName}"
+                                    },
                                     navController = navController,
                                     lastMessage = chatInfo.lastMessageText,
                                     isMessageRead = chatInfo.isMessageSeen,
@@ -252,7 +256,7 @@ fun HomeScreen(
                 onClick = {
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                     navController.navigate(ChattrixScreens.NEW_CHAT_SCREEN)
-                          },
+                },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(24.dp)

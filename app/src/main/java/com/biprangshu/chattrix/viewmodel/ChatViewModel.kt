@@ -26,7 +26,7 @@ class ChatViewModel @Inject constructor(
 
     private var messageListener: ValueEventListener? = null
     private var currentMessagesRef: com.google.firebase.database.DatabaseReference? = null
-    private val database = FirebaseDatabase.getInstance("https.://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
+    private val database = FirebaseDatabase.getInstance("https://chattrix-9fbb6-default-rtdb.europe-west1.firebasedatabase.app")
 
 
     private var currentChatId: String = ""

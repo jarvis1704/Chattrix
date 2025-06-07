@@ -1,21 +1,56 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Add this project-specific ProGuard rules file to your app-level proguard-rules.pro file
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep Firebase Realtime Database classes
+-keep class com.google.firebase.database.** { *; }
+-keep class com.google.firebase.firestore.** { *; }
+-keep class com.google.firebase.auth.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep your data models - CRITICAL for Firebase serialization
+-keep class com.biprangshu.chattrix.data.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep model classes used with Firebase
+-keep class com.biprangshu.chattrix.data.MessageModel { *; }
+-keep class com.biprangshu.chattrix.data.UserModel { *; }
+-keep class com.biprangshu.chattrix.viewmodel.UserChatInfo { *; }
+
+# Keep Firebase serialization annotations
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepattributes EnclosingMethod
+-keepattributes InnerClasses
+
+# Keep classes that use Firebase serialization
+-keepclassmembers class * {
+    @com.google.firebase.database.PropertyName <fields>;
+    @com.google.firebase.database.PropertyName <methods>;
+    @com.google.firebase.firestore.PropertyName <fields>;
+    @com.google.firebase.firestore.PropertyName <methods>;
+}
+
+# Keep default constructors for Firebase model classes
+-keepclassmembers class com.biprangshu.chattrix.data.** {
+    <init>();
+}
+
+# Keep getter and setter methods for Firebase models
+-keepclassmembers class com.biprangshu.chattrix.data.** {
+    public <methods>;
+    public <fields>;
+}
+
+# General Firebase rules
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+
+# Keep Hilt/Dagger classes
+-keep class dagger.hilt.** { *; }
+-keep class * extends dagger.hilt.android.lifecycle.HiltViewModel { *; }
+-keep @dagger.hilt.android.lifecycle.HiltViewModel class * { *; }
+
+# Keep coroutines
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.coroutines.**
+
+# Keep reflection for Firebase
+-keepattributes RuntimeVisibleAnnotations
+-keepattributes RuntimeVisibleParameterAnnotations

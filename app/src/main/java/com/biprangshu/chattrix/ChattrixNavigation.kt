@@ -1,9 +1,5 @@
 package com.biprangshu.chattrix
 
-import android.app.Activity
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -22,14 +18,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -48,9 +43,6 @@ import com.biprangshu.chattrix.onboarding.OtpScreen
 import com.biprangshu.chattrix.onboarding.SignUpPage
 import com.biprangshu.chattrix.profile.EditProfileScreen
 import com.biprangshu.chattrix.profile.UserProfileScreen
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
-
 
 object AnimationConstants {
     const val DURATION_SHORT = 200
@@ -60,7 +52,6 @@ object AnimationConstants {
     const val OFFSET_FULL = 1000
     const val OFFSET_PARTIAL = 300
 }
-
 
 object NavigationAnimations {
 
@@ -119,7 +110,6 @@ object NavigationAnimations {
             easing = LinearOutSlowInEasing
         )
     )
-
 
     fun scaleSlideInFromBottom(): EnterTransition = slideInVertically(
         initialOffsetY = { AnimationConstants.OFFSET_PARTIAL },
@@ -207,7 +197,7 @@ object NavigationAnimations {
         animationSpec = tween(
             durationMillis = AnimationConstants.DURATION_SHORT,
             delayMillis = AnimationConstants.DURATION_SHORT,
-            easing = LinearOutSlowInEasing
+            easing = FastOutSlowInEasing
         )
     ) + scaleOut(
         targetScale = 0.98f,
@@ -224,25 +214,9 @@ fun ChattrixNavigation(
     navController: NavHostController,
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                account.idToken?.let { token ->
-                    authViewModel.signInWithGoogle(token)
-                }
-            } catch (e: ApiException) {
-                Log.w("GoogleSignIn", "Google sign in failed", e)
-            }
-        }
-    }
-
+    val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
 
-    // Check if we need to navigate to home when auth state changes to signed in
     LaunchedEffect(authState) {
         when (authState) {
             is AuthState.SignedIn -> {
@@ -252,11 +226,11 @@ fun ChattrixNavigation(
                     }
                 }
             }
-            else -> {}
+            else -> {  }
         }
     }
 
-    // Enhanced loading screen with consistent background
+    //to be experimented with after version 1 of Chattix
     if (authState is AuthState.Initial || authState is AuthState.Loading) {
         Box(
             modifier = Modifier
@@ -282,7 +256,7 @@ fun ChattrixNavigation(
             modifier = Modifier.fillMaxSize()
         ) {
 
-            // Login screen
+            // ─── Login screen ───
             composable(
                 route = ChattrixScreens.LOGIN_SCREEN,
                 enterTransition = { NavigationAnimations.gentleFadeIn() },
@@ -291,7 +265,7 @@ fun ChattrixNavigation(
                 LoginScreen(
                     navController = navController,
                     onSignInClick = {
-                        launcher.launch(authViewModel.getSignInIntent())
+                        authViewModel.signInWithGoogle(context)
                     },
                     onNavigateToHome = {
                         navController.navigate(ChattrixScreens.HOME_SCREEN) {
@@ -303,7 +277,7 @@ fun ChattrixNavigation(
                 )
             }
 
-            // Login with email
+            // ─── Login with email ───
             composable(
                 route = OnBoardingScreens.LOGIN_EMAIL,
                 enterTransition = { NavigationAnimations.slideInFromRight() },
@@ -314,7 +288,7 @@ fun ChattrixNavigation(
                 LoginWithEmail(navController = navController)
             }
 
-            // OTP verification screen
+            // ─── OTP verification ───
             composable(
                 route = OnBoardingScreens.OTP_SCREEN,
                 enterTransition = { NavigationAnimations.slideInFromRight() },
@@ -325,7 +299,7 @@ fun ChattrixNavigation(
                 OtpScreen(navController = navController)
             }
 
-            // SignUp screen
+            // ─── SignUp ───
             composable(
                 route = OnBoardingScreens.SIGNUP_SCREEN,
                 enterTransition = { NavigationAnimations.slideInFromRight() },
@@ -336,7 +310,7 @@ fun ChattrixNavigation(
                 SignUpPage(navController = navController)
             }
 
-            // Home screen
+            // ─── Home ───
             composable(
                 route = ChattrixScreens.HOME_SCREEN,
                 enterTransition = { NavigationAnimations.scaleSlideInFromBottom() },
@@ -350,7 +324,7 @@ fun ChattrixNavigation(
                 )
             }
 
-            // Profile screen
+            // ─── Profile ───
             composable(
                 route = ChattrixScreens.PROFILE_SCREEN,
                 enterTransition = { NavigationAnimations.modalSlideInFromBottom() },
@@ -361,7 +335,7 @@ fun ChattrixNavigation(
                 UserProfileScreen(navController = navController)
             }
 
-            // Edit Profile screen
+            // ─── Edit Profile ───
             composable(
                 route = ChattrixScreens.EDIT_PROFILE_SCREEN,
                 enterTransition = { NavigationAnimations.slideInFromRight() },
@@ -372,7 +346,7 @@ fun ChattrixNavigation(
                 EditProfileScreen(navController = navController)
             }
 
-            // Chat screen
+            // ─── Chat ───
             composable(
                 route = "${ChattrixScreens.CHAT_SCREEN}/{userId}/{userName}",
                 arguments = listOf(
@@ -393,7 +367,7 @@ fun ChattrixNavigation(
                 )
             }
 
-            // New chat screen
+            // ─── New chat ───
             composable(
                 route = ChattrixScreens.NEW_CHAT_SCREEN,
                 enterTransition = { NavigationAnimations.modalSlideInFromBottom() },
