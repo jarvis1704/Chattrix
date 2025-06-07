@@ -130,7 +130,7 @@ class AuthViewModel @Inject constructor(
 
                 when (e) {
                     is NoCredentialException -> {
-                        // Try again with filterByAuthorizedAccounts = true if first attempt failed
+
                         retryGoogleSignInWithFilteredAccounts(context)
                     }
                     else -> {

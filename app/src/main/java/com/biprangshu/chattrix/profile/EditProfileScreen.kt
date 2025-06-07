@@ -379,7 +379,7 @@ fun EditProfileScreen(
             }
         }
 
-        // Snackbar Host
+
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.navigationBarsPadding()

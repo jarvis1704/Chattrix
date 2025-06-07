@@ -42,10 +42,10 @@ class MainActivityViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _allUserList = MutableStateFlow<List<UserModel>>(emptyList()) // Initialize with emptyList
+    private val _allUserList = MutableStateFlow<List<UserModel>>(emptyList())
     val allUserList: StateFlow<List<UserModel>> = _allUserList.asStateFlow()
 
-    private val _userList = MutableStateFlow<List<UserChatInfo>>(emptyList()) // Initialize with emptyList
+    private val _userList = MutableStateFlow<List<UserChatInfo>>(emptyList())
     val userList: StateFlow<List<UserChatInfo>> = _userList.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -125,7 +125,7 @@ class MainActivityViewModel @Inject constructor(
             Log.d(TAG, "loadUsersWithChats: Starting.")
             if(currentUser == null) {
                 Log.e(TAG, "loadUsersWithChats: Current user is null. Cannot load users with chats.")
-                _userList.value = emptyList() // Clear list if user is null
+                _userList.value = emptyList()
                 return@launch
             }
             Log.d(TAG, "loadUsersWithChats: Current User ID: ${currentUser.uid}")
