@@ -188,13 +188,11 @@ class AuthViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             try {
-
+                auth.signOut()
+                _authState.value = AuthState.SignedOut
                 credentialManager.clearCredentialState(androidx.credentials.ClearCredentialStateRequest())
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Error clearing credential state during sign out", e)
-            } finally {
-                auth.signOut()
-                _authState.value = AuthState.SignedOut
             }
         }
     }

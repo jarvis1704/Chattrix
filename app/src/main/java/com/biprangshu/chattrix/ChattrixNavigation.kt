@@ -231,19 +231,19 @@ fun ChattrixNavigation(
     }
 
     //to be experimented with after version 1 of Chattix
-    if (authState is AuthState.Initial || authState is AuthState.Loading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        return
-    }
+//    if (authState is AuthState.Initial || authState is AuthState.Loading) {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .background(MaterialTheme.colorScheme.background),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            CircularProgressIndicator(
+//                color = MaterialTheme.colorScheme.primary
+//            )
+//        }
+//        return
+//    }
 
     Box(
         modifier = modifier
