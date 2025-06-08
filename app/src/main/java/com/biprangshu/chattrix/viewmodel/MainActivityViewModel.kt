@@ -14,6 +14,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,12 +29,18 @@ data class UserChatInfo(
     val isMessageSeen: Boolean,
 )
 
+data class UserCache(
+    val users: Map<String, UserModel> = emptyMap(),
+    val lastUpdated: Long = 0L
+)
+
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     application: Application
 ): AndroidViewModel(application) {
 
     private val TAG = "MainActivityVM"
+    private val CACHE_DURATION = 5 * 60 * 1000L // 5 minutes
 
     private val currentUser = FirebaseAuth.getInstance().currentUser
     private val db = FirebaseFirestore.getInstance()
@@ -51,6 +58,9 @@ class MainActivityViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    // Cache for user data
+    private var userCache = UserCache()
+
     private var chatListener: ValueEventListener? = null
     private var allUsersListenerRegistration: com.google.firebase.firestore.ListenerRegistration? = null
 
@@ -58,8 +68,10 @@ class MainActivityViewModel @Inject constructor(
     init {
         Log.d(TAG, "ViewModel init. Current user: ${currentUser?.uid}")
         if (currentUser != null) {
-            loadAllUsers()
-            loadUsersWithChats()
+            viewModelScope.launch {
+                loadAllUsers()
+                loadUsersWithChats()
+            }
         } else {
             Log.w(TAG, "ViewModel init: Current user is null. Not loading data yet.")
 
@@ -96,19 +108,28 @@ class MainActivityViewModel @Inject constructor(
                     if (snapshot != null) {
                         Log.d(TAG, "loadAllUsers: Snapshot received with ${snapshot.documents.size} documents.")
                         val newList = mutableListOf<UserModel>()
+                        val cacheMap = mutableMapOf<String, UserModel>()
                         for (document in snapshot.documents) {
                             try {
                                 val userModel = document.toObject(UserModel::class.java)
-                                if (userModel?.userId != null && userModel.userId != currentUser.uid) {
-                                    newList.add(userModel)
-                                    Log.d(TAG, "loadAllUsers: Added user to all users: ${userModel.userName} (ID: ${userModel.userId})")
-                                } else if (userModel?.userId == currentUser.uid) {
-                                    Log.d(TAG, "loadAllUsers: Skipping current user: ${userModel.userName}")
+                                if (userModel?.userId != null) {
+                                    cacheMap[userModel.userId] = userModel
+
+                                    if (userModel.userId != currentUser.uid) {
+                                        newList.add(userModel)
+                                        Log.d(TAG, "loadAllUsers: Added user to all users: ${userModel.userName} (ID: ${userModel.userId})")
+                                    } else {
+                                        Log.d(TAG, "loadAllUsers: Skipping current user: ${userModel.userName}")
+                                    }
                                 }
                             } catch (e: Exception) {
                                 Log.e(TAG, "loadAllUsers: Error converting document to UserModel", e)
                             }
                         }
+
+
+                        userCache = UserCache(cacheMap, System.currentTimeMillis())
+
                         Log.d(TAG, "loadAllUsers: Final all users list size: ${newList.size}")
                         _allUserList.value = newList
                     } else {
@@ -193,60 +214,6 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-//    private fun fetchUsersById(userIds: List<String>) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            Log.d(TAG, "fetchUsersById: Starting for user IDs: $userIds")
-//            if (userIds.isEmpty()) {
-//                Log.d(TAG, "fetchUsersById: userIds list is empty. Not fetching from Firestore.")
-//                _userList.value = emptyList()
-//                return@launch
-//            }
-//            _isLoading.value = true
-//            try {
-//                val users = mutableListOf<UserModel>()
-//                val batches = userIds.chunked(10) // Max 10 for 'in' query
-//
-//                for (batch in batches) {
-//                    Log.d(TAG, "fetchUsersById: Querying Firestore for batch: $batch")
-//                    try {
-//                        val querySnapshot = db.collection("users")
-//                            .whereIn("userId", batch)
-//                            .get()
-//                            .await()
-//
-//                        Log.d(TAG, "fetchUsersById: Firestore query for batch returned ${querySnapshot.documents.size} documents.")
-//
-//                        for (document in querySnapshot.documents) {
-//                            try {
-//                                val userModel = document.toObject(UserModel::class.java)
-//                                if (userModel?.userId != null) {
-//                                    users.add(userModel)
-//                                    Log.d(TAG, "fetchUsersById: Successfully fetched and added user: ${userModel.userName} (ID: ${userModel.userId})")
-//                                } else {
-//                                    Log.w(TAG, "fetchUsersById: Converted UserModel is null or has null userId. Document ID: ${document.id}")
-//                                }
-//                            } catch (e: Exception) {
-//                                Log.e(TAG, "fetchUsersById: Error converting Firestore document ${document.id} to UserModel.", e)
-//                            }
-//                        }
-//                    } catch (e: Exception) {
-//                        Log.e(TAG, "fetchUsersById: Error fetching batch $batch from Firestore.", e)
-//                    }
-//                }
-//
-//                val distinctUsers = users.distinctBy { it.userId }
-//                _userList.value = distinctUsers
-//                Log.d(TAG, "fetchUsersById: Successfully updated _userList with ${distinctUsers.size} users: ${distinctUsers.joinToString { it.userName ?: "N/A" }}")
-//
-//            } catch (e: Exception) {
-//                Log.e(TAG, "fetchUsersById: General error.", e)
-//                _errorMessage.value = "Failed to load chat user details: ${e.message}"
-//                _userList.value = emptyList()
-//            } finally {
-//                _isLoading.value = false
-//            }
-//        }
-//    }
 
     fun getChatId(userId1: String, userId2: String): String {
         return if (userId1 < userId2){

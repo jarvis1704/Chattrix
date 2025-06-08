@@ -29,6 +29,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,6 +45,9 @@ class AuthViewModel @Inject constructor(
     val updateState: StateFlow<UpdateState> = _updateState
 
     private val credentialManager = CredentialManager.create(application)
+
+    // Add a flag to prevent multiple simultaneous Google Sign-In attempts
+    private var isGoogleSignInInProgress = false
 
     init {
         checkAuthState()
@@ -104,40 +108,79 @@ class AuthViewModel @Inject constructor(
     }
 
     fun signInWithGoogle(context: Context) {
-        _authState.value = AuthState.Loading
+        // Prevent multiple simultaneous attempts
+        if (isGoogleSignInInProgress) {
+            Log.d("AuthViewModel", "Google Sign-In already in progress, ignoring request")
+            return
+        }
 
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(getApplication<Application>().getString(R.string.default_web_client_id))
-            .build()
-
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
+        isGoogleSignInInProgress = true
+        Log.d("AuthViewModel", "Starting Google Sign-In process")
 
         viewModelScope.launch {
             try {
+                // Clear any previous credential state first
+                try {
+                    credentialManager.clearCredentialState(androidx.credentials.ClearCredentialStateRequest())
+                    // Small delay to ensure clearing is complete
+                    delay(100)
+                } catch (e: Exception) {
+                    Log.w("AuthViewModel", "Could not clear credential state", e)
+                }
+
+                val googleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false) // Always show account picker
+                    .setServerClientId(getApplication<Application>().getString(R.string.default_web_client_id))
+                    .setAutoSelectEnabled(false) // Disable auto-select to ensure popup appears
+                    .build()
+
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+
+                Log.d("AuthViewModel", "Attempting to get Google credential")
                 val result = credentialManager.getCredential(context = context, request)
                 handleGoogleSignInResult(result)
+
             } catch (e: GetCredentialException) {
-                Log.e("AuthViewModel", "Google Sign-In GetCredentialException", e)
+                Log.e("AuthViewModel", "Google Sign-In GetCredentialException: ${e.javaClass.simpleName}", e)
+
                 val errorMessage = when (e) {
-                    is NoCredentialException -> "No Google accounts found on this device. Please add an account in your device settings."
-                    else -> if (e.message?.contains("canceled", ignoreCase = true) == true) {
-                        "Sign-in was canceled."
-                    } else {
-                        "An error occurred during sign-in. Please try again."
+                    is NoCredentialException -> {
+                        "No Google accounts found. Please add a Google account to your device."
+                    }
+                    else -> {
+                        val message = e.message ?: ""
+                        when {
+                            message.contains("canceled", ignoreCase = true) -> {
+                                "Google Sign-In was canceled."
+                            }
+                            message.contains("network", ignoreCase = true) -> {
+                                "Network error. Please check your internet connection and try again."
+                            }
+                            message.contains("developer", ignoreCase = true) -> {
+                                "Google Sign-In configuration error. Please contact support."
+                            }
+                            else -> {
+                                "Google Sign-In failed. Please try again."
+                            }
+                        }
                     }
                 }
+
                 _authState.value = AuthState.Error(errorMessage)
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Unexpected error during Google Sign-In", e)
-                _authState.value = AuthState.Error("An unexpected error occurred: ${e.message}")
+                _authState.value = AuthState.Error("An unexpected error occurred. Please try again.")
+            } finally {
+                isGoogleSignInInProgress = false
             }
         }
     }
 
     private fun handleGoogleSignInResult(result: GetCredentialResponse) {
+        Log.d("AuthViewModel", "Handling Google Sign-In result")
+
         when (val credential = result.credential) {
             is CustomCredential -> {
                 if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
@@ -145,31 +188,49 @@ class AuthViewModel @Inject constructor(
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         val idToken = googleIdTokenCredential.idToken
 
+                        Log.d("AuthViewModel", "Successfully parsed Google ID token")
+
                         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
                         auth.signInWithCredential(firebaseCredential)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     val user = auth.currentUser
+                                    Log.d("AuthViewModel", "Firebase authentication successful for user: ${user?.email}")
+
                                     user?.let {
                                         saveUserToFirestore(it, it.displayName ?: "User")
                                     }
                                     _authState.value = AuthState.SignedIn(user)
                                 } else {
-                                    _authState.value = AuthState.Error(task.exception?.message ?: "Firebase authentication failed")
+                                    Log.e("AuthViewModel", "Firebase authentication failed", task.exception)
+                                    val errorMessage = task.exception?.message?.let { message ->
+                                        when {
+                                            message.contains("network", ignoreCase = true) ->
+                                                "Network error during sign-in. Please check your connection."
+                                            message.contains("invalid", ignoreCase = true) ->
+                                                "Invalid Google account. Please try with a different account."
+                                            else -> "Authentication failed: $message"
+                                        }
+                                    } ?: "Firebase authentication failed. Please try again."
+
+                                    _authState.value = AuthState.Error(errorMessage)
                                 }
                             }
                     } catch (e: GoogleIdTokenParsingException) {
-                        Log.e("AuthViewModel", "Invalid Google ID token response", e)
-                        _authState.value = AuthState.Error("Failed to verify Google Sign-In. Please try again.")
+                        Log.e("AuthViewModel", "Failed to parse Google ID token", e)
+                        _authState.value = AuthState.Error("Failed to process Google Sign-In response. Please try again.")
+                    } catch (e: Exception) {
+                        Log.e("AuthViewModel", "Unexpected error processing Google credential", e)
+                        _authState.value = AuthState.Error("Failed to process Google Sign-In. Please try again.")
                     }
                 } else {
                     Log.e("AuthViewModel", "Unexpected credential type: ${credential.type}")
-                    _authState.value = AuthState.Error("An unsupported credential type was received.")
+                    _authState.value = AuthState.Error("Invalid credential type received from Google.")
                 }
             }
             else -> {
-                Log.e("AuthViewModel", "Unexpected credential type")
-                _authState.value = AuthState.Error("An unexpected error occurred during sign-in.")
+                Log.e("AuthViewModel", "Unexpected credential class: ${credential?.javaClass?.simpleName}")
+                _authState.value = AuthState.Error("Invalid credential format received.")
             }
         }
     }
@@ -205,7 +266,6 @@ class AuthViewModel @Inject constructor(
             profileImage = user.photoUrl?.toString(),
         )
         Log.d("AuthViewModel", "Saving user to Firestore: $userModel")
-
 
         db.collection("users").document(user.uid)
             .set(userModel, SetOptions.merge())
@@ -255,6 +315,13 @@ class AuthViewModel @Inject constructor(
 
     fun resetUpdateState() {
         _updateState.value = UpdateState.Initial
+    }
+
+    // Add method to reset auth state if needed
+    fun resetAuthState() {
+        if (_authState.value is AuthState.Error) {
+            _authState.value = AuthState.SignedOut
+        }
     }
 }
 
