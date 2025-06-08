@@ -314,7 +314,7 @@ fun UserProfileScreen(
                         onClick = {
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                             authViewModel.signOut()
-                            navController.navigate("loginscreen") {
+                            navController.navigate(ChattrixScreens.LOGIN_SCREEN) {
                                 popUpTo(0) { inclusive = true }
                             }
                         },
