@@ -1,5 +1,10 @@
 package com.biprangshu.chattrix
 
+import android.app.Activity
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -21,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,6 +47,7 @@ import com.biprangshu.chattrix.onboarding.OtpScreen
 import com.biprangshu.chattrix.onboarding.SignUpPage
 import com.biprangshu.chattrix.profile.EditProfileScreen
 import com.biprangshu.chattrix.profile.UserProfileScreen
+import kotlinx.coroutines.launch
 
 object AnimationConstants {
     const val DURATION_SHORT = 200
@@ -215,6 +222,8 @@ fun ChattrixNavigation(
     val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
 
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(authState) {
         when (authState) {
             is AuthState.SignedIn -> {
@@ -245,11 +254,35 @@ fun ChattrixNavigation(
                 enterTransition = { NavigationAnimations.gentleFadeIn() },
                 exitTransition = { NavigationAnimations.gentleFadeOut() }
             ) {
+
+                val launcher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartIntentSenderForResult()
+                ) { result ->
+                    if(result.resultCode == Activity.RESULT_OK){
+                        result.data?.let { intent ->
+                            authViewModel.handleGoogleSignInResult(intent)
+                        }
+                    } else {
+                        Log.d("AppNav", "Google sign-in cancelled or failed")
+                    }
+                }
+
                 LoginScreen(
                     navController = navController,
                     onSignInClick = {
-                        authViewModel.signInWithGoogle(context)
-                    },
+                        coroutineScope.launch {
+                            try {
+                                val signInIntentSender = authViewModel.signInWithGoogle()
+                                signInIntentSender?.let { intentSender ->
+                                    launcher.launch(
+                                        IntentSenderRequest.Builder(intentSender).build()
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                Log.e("AppNav", "Error initiating Google Sign-In", e)
+                            }
+                        }
+                        },
                     onNavigateToHome = {
                         navController.navigate(ChattrixScreens.HOME_SCREEN) {
                             popUpTo(ChattrixScreens.LOGIN_SCREEN) {
